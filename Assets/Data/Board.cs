@@ -38,7 +38,7 @@ public class Board: MonoBehaviour
         cardsCanvasTransform = GameObject.Find("CardsCanvas").transform;
         t = GameObject.Find("CardTypeTilemap").GetComponent<Tilemap>();
         selectedItems = GameObject.Find("SelectedItems").GetComponent<SelectedItems>();
-        fowManager = GameObject.Find("FOW").GetComponent<FOWManager>();
+        fowManager = GameObject.Find("FOWManager").GetComponent<FOWManager>();
         initialized = true;
     }
 

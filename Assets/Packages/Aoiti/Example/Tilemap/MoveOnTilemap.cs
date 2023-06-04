@@ -98,7 +98,7 @@ public class MoveOnTilemap : MonoBehaviour
         tilemapSelector = GameObject.Find("TilemapSelector").GetComponent<TilemapSelector>();
         cellHover = tilemapSelector.GetComponent<CellHover>();
         selectedItems = GameObject.Find("SelectedItems").GetComponent<SelectedItems>();
-        fow = GameObject.Find("FOW").GetComponent<FOWManager>();
+        fow = GameObject.Find("FOWManager").GetComponent<FOWManager>();
 
         BoundsInt bounds = terrainTilemaps[0].cellBounds;
         TileBase[][] allTiles = new TileBase[terrainTilemaps.Length][];

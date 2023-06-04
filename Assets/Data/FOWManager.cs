@@ -13,6 +13,12 @@ public class FOWManager : MonoBehaviour
     Game game;
 
     bool isInitialized = false;
+
+    void Awake()
+    {
+        
+    }
+
     void Initialize()
     {
         fow = GameObject.Find("FOWTilemap").GetComponent<Tilemap>();
