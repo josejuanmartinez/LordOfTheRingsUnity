@@ -1,2 +1,2 @@
-# Lord of the Rings video game
-For Unity
+# Lord of the Rings video game (Unity)
+Developed using C#
