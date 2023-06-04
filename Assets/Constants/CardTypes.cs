@@ -1,0 +1,16 @@
+public enum CardTypesEnum
+{
+    FREE_BASTION,
+    NEUTRAL_BASTION,
+    FRONTIER_BASTION,
+    DARK_BASTION,
+    LAIR,
+    WILDERNESS,
+    SEA,
+    BALROG_HAVEN,
+    FREE_HAVEN,
+    NEUTRAL_HAVEN,
+    DARK_HAVEN,
+    RENEGADE_HAVEN,
+    DRAGON_HAVEN
+}
