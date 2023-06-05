@@ -12,8 +12,12 @@ public class CardUI : MonoBehaviour
     public TextMeshProUGUI cardName;
     public TextMeshProUGUI prowess;
     public TextMeshProUGUI defence;
+    public TextMeshProUGUI movement;
+    public Button button;
     public Image icon;
-    public bool isShownWithOtherCard = false;
+    public CanvasGroup canvasGroup;
+    
+    private bool isShownWithOtherCard = false;
 
     public string id = Guid.NewGuid().ToString(); 
     
@@ -24,9 +28,11 @@ public class CardUI : MonoBehaviour
 
     private bool isMoving = false;
     private bool initialized = false;
+    private bool isVisible = true;
 
     private Tilemap t;
     private SelectedItems selectedItems;
+    private Game game;
 
     private Vector3 currentDisplacementPosition = Vector3.zero;
     private Vector3 currentPosition = Vector3.zero;
@@ -34,6 +40,7 @@ public class CardUI : MonoBehaviour
     void Awake()
     {
         board = GameObject.Find("Board").GetComponent<Board>();
+        game = GameObject.Find("Game").GetComponent<Game>();
         selectedItems = GameObject.Find("SelectedItems").GetComponent<SelectedItems>();
         detailsObject.SetActive(false);
         t = GameObject.Find("CardTypeTilemap").GetComponent<Tilemap>();
@@ -42,6 +49,7 @@ public class CardUI : MonoBehaviour
     public void Initialize()
     {
         card = GetComponent<CardInPlay>();
+        button.interactable = card.owner == game.GetHumanPlayer().GetNation();
 
         if(card == null)
             return;
@@ -55,10 +63,11 @@ public class CardUI : MonoBehaviour
         {
             short prowessValue = card.GetCharacterDetails().prowess;
             short defenceValue = card.GetCharacterDetails().defence;
+            short movementLeft = MovementConstants.characterMovement;
 
             prowess.text = Sprites.prowess + prowessValue.ToString();
             defence.text = Sprites.defence + defenceValue.ToString();
-
+            movement.text = Sprites.movement + movementLeft.ToString();
         }
 
         RefreshAtHex();
@@ -102,11 +111,31 @@ public class CardUI : MonoBehaviour
         if (detailsObject.activeSelf != isOpen)
             detailsObject.SetActive(isOpen);
 
+        if (game.GetHumanPlayer().SeesTile(card.hex) != isVisible)
+        {
+            isVisible = game.GetHumanPlayer().SeesTile(card.hex);
+            canvasGroup.alpha = isVisible ? 1 : 0;
+            canvasGroup.interactable = isVisible;
+            canvasGroup.blocksRaycasts = isVisible;
+        }        
+
+        if (isVisible)
+        {
+            short movementLeft = (short)(MovementConstants.characterMovement - card.moved);
+            movement.text = Sprites.movement + movementLeft.ToString();
+        }
+
         RefreshAtHex();
     }
 
     public void Toggle()
     {
+        if(game.GetHumanPlayer().GetNation() != card.owner)
+        {
+            isOpen = false;
+            return;
+        }
+
         isOpen = !isOpen;
         if (isOpen)
         {

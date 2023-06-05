@@ -1,3 +1,4 @@
+using NUnit.Framework.Constraints;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,9 @@ using UnityEngine.Tilemaps;
 
 public class FOWManager : MonoBehaviour
 {
-    public short visionLevels = 2;
+    public short cityVisionLevel = 5;
+    public short cardVisionLevel = 3;
+    public Tile fowTile;
     Tilemap fow;
     Board board;
     Game game;
@@ -38,37 +41,123 @@ public class FOWManager : MonoBehaviour
         List <CityInPlay> cities = board.GetCityManager().GetCitiesOfPlayer(game.GetHumanPlayer().GetNation()); 
         foreach (CityInPlay city in cities)
         {
-            Vector3Int cityHex = new Vector3Int(city.hex.x, city.hex.y, 0);
-            List<Vector3Int> hexesToClean = new List<Vector3Int>() { cityHex };
-            for(int i=0; i<visionLevels; i++) {
-                List<Vector3Int> moreHexesToClean = new List<Vector3Int>();
-                foreach (Vector3Int hex in hexesToClean)
-                {
-                    List<Vector3Int> v3Surroundings = HexTranslator.GetSurroundings(hex);
-                    moreHexesToClean.AddRange(v3Surroundings);
-                }
-                hexesToClean = moreHexesToClean.Distinct().ToList();
-            }
-            foreach (Vector3Int surrounding in hexesToClean.Distinct())
-            {
-                fow.SetTile(surrounding, null);
-                fow.RefreshTile(surrounding);
-            }
+            UpdateCityFOW(city);
         }
     }
 
-    public void UpdateCardFOW(Vector3Int hex)
+    public void UpdateCityFOW(CityInPlay city)
     {
         if (!isInitialized)
             Initialize();
         if (!isInitialized)
             return;
 
-        List<Vector3Int> v3Surroundings = HexTranslator.GetSurroundings(hex);
-        foreach (Vector3Int surrounding in v3Surroundings.Distinct())
+        Vector3Int cityHex = new Vector3Int(city.hex.x, city.hex.y, 0);
+        HashSet<Vector3Int> hexesToClean = new HashSet<Vector3Int>() { cityHex };
+        for (int i = 0; i < cityVisionLevel; i++)
+        {
+            HashSet<Vector3Int> moreHexesToClean = new HashSet<Vector3Int>();
+            foreach (Vector3Int hex in hexesToClean)
+            {
+                List<Vector3Int> v3Surroundings = HexTranslator.GetSurroundings(hex);
+                moreHexesToClean.UnionWith(v3Surroundings);
+            }
+            hexesToClean = moreHexesToClean;
+        }
+        foreach (Vector3Int surrounding in hexesToClean)
         {
             fow.SetTile(surrounding, null);
             fow.RefreshTile(surrounding);
+            game.GetHumanPlayer().SetCitySeesTile(new Vector2Int(surrounding.x, surrounding.y));
+        }
+    }
+
+    public void UpdateCardsFOW()
+    {
+        if (!isInitialized)
+            Initialize();
+        if (!isInitialized)
+            return;
+
+        List<CardInPlay> cards = board.GetCardManager().GetCardsOfPlayer(game.GetHumanPlayer().GetNation());
+        foreach (CardInPlay card in cards)
+        {
+            UpdateCardFOW(card);
+        }
+    }
+
+    public void UpdateCardFOW(CardInPlay card)
+    {
+        if (!isInitialized)
+            Initialize();
+        if (!isInitialized)
+            return;
+
+        Vector3Int cardHex = new Vector3Int(card.hex.x, card.hex.y, 0);
+        HashSet<Vector3Int> hexesToClean = new HashSet<Vector3Int>() { cardHex };
+        for (int i = 0; i < cardVisionLevel; i++)
+        {
+            HashSet<Vector3Int> moreHexesToClean = new HashSet<Vector3Int>();
+            foreach (Vector3Int hex in hexesToClean)
+            {
+                List<Vector3Int> v3Surroundings = HexTranslator.GetSurroundings(hex);
+                moreHexesToClean.UnionWith(v3Surroundings);
+            }
+            hexesToClean.UnionWith(moreHexesToClean);
+        }
+        foreach (Vector3Int surrounding in hexesToClean)
+        {
+            fow.SetTile(surrounding, null);
+            fow.RefreshTile(surrounding);
+            game.GetHumanPlayer().SetCardSeesTile(new Vector2Int(surrounding.x, surrounding.y));
+        }
+    }
+
+    public void UpdateCardFOW(Vector3Int newHex, Vector3Int oldHex)
+    {
+        if (!isInitialized)
+            Initialize();
+        if (!isInitialized)
+            return;
+
+        Vector3Int cardHex = new Vector3Int(oldHex.x, oldHex.y, 0);
+        HashSet<Vector3Int> hexesToClean = new HashSet<Vector3Int>() { cardHex };
+        for (int i = 0; i < cardVisionLevel; i++)
+        {
+            HashSet<Vector3Int> moreHexesToClean = new HashSet<Vector3Int>();
+            foreach (Vector3Int hex in hexesToClean)
+            {
+                List<Vector3Int> v3Surroundings = HexTranslator.GetSurroundings(hex);
+                moreHexesToClean.UnionWith(v3Surroundings);
+            }
+            hexesToClean.UnionWith(moreHexesToClean);
+        }
+        foreach (Vector3Int surrounding in hexesToClean)
+        {
+            if(!game.GetHumanPlayer().CitySeesTile(new Vector2Int(surrounding.x, surrounding.y))) {
+                fow.SetTile(surrounding, fowTile);
+                fow.RefreshTile(surrounding);
+            }
+            game.GetHumanPlayer().UnsetCardSeesTile(new Vector2Int(surrounding.x, surrounding.y));
+        }
+
+        cardHex = new Vector3Int(newHex.x, newHex.y, 0);
+        hexesToClean = new HashSet<Vector3Int>() { cardHex };
+        for (int i = 0; i < cardVisionLevel; i++)
+        {
+            HashSet<Vector3Int> moreHexesToClean = new HashSet<Vector3Int>();
+            foreach (Vector3Int hex in hexesToClean)
+            {
+                List<Vector3Int> v3Surroundings = HexTranslator.GetSurroundings(hex);
+                moreHexesToClean.UnionWith(v3Surroundings);
+            }
+            hexesToClean.UnionWith(moreHexesToClean);
+        }
+        foreach (Vector3Int surrounding in hexesToClean)
+        {
+            fow.SetTile(surrounding, null);
+            fow.RefreshTile(surrounding);
+            game.GetHumanPlayer().SetCardSeesTile(new Vector2Int(surrounding.x, surrounding.y));
         }
     }
 }

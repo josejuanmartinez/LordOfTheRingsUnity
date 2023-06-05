@@ -12,6 +12,7 @@ public class CityUI : MonoBehaviour
     public TextMeshProUGUI gold;
     public TextMeshProUGUI prod;
     public TextMeshProUGUI cityName;
+    public Button button;
     public Image health;
     public Image icon;
     public Image alignment;
@@ -45,8 +46,10 @@ public class CityUI : MonoBehaviour
     {
         if (!game.IsInitialized())
             return;
-
+        
         city = GetComponent<CityInPlay>();
+        
+        button.interactable = city.owner == game.GetHumanPlayer().GetNation();
 
         if (city == null)
             return;
@@ -114,7 +117,7 @@ public class CityUI : MonoBehaviour
         if(detailsObject.activeSelf != isOpen)
             detailsObject.SetActive(isOpen);
 
-        isShownWithOtherCard = board.GetTile(city.GetHex()).HasCards();
+        isShownWithOtherCard = board.GetTile(city.GetHex()).HasCards() && game.GetHumanPlayer().SeesTile(city.GetHex());
 
         short expectedHorizontalDisplacement = isShownWithOtherCard ? DisplacementPixels.left : DisplacementPixels.NONE;
         displacement.transform.localPosition = new Vector3(expectedHorizontalDisplacement, DisplacementPixels.down, 0);
@@ -122,6 +125,12 @@ public class CityUI : MonoBehaviour
 
     public void Toggle()
     {
+        if (game.GetHumanPlayer().GetNation() != city.owner)
+        {
+            isOpen = false;
+            return;
+        }
+
         isOpen = !isOpen;
         if (isOpen)
         {

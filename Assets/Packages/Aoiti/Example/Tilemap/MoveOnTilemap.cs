@@ -5,6 +5,7 @@ using UnityEngine.Tilemaps;
 using Aoiti.Pathfinding;
 using UnityEngine.UI;
 using TMPro;
+using Unity.VisualScripting;
 
 public class MoveOnTilemap : MonoBehaviour
 {
@@ -178,10 +179,10 @@ public class MoveOnTilemap : MonoBehaviour
                 }
             }
             else if (Input.GetMouseButtonUp(1))
-            {
-                Reset();
+            {   
                 StopAllCoroutines();
                 StartCoroutine(MovePath());
+                Reset();
                 cameraController.preventDrag = false;
 
             }
@@ -218,16 +219,55 @@ public class MoveOnTilemap : MonoBehaviour
     {
         if (selectedCardUIForMovement != null)
         {
+            if (selectedCardUIForMovement.GetCard().moved >= MovementConstants.characterMovement)
+            {
+                Reset();
+                yield return null;
+            }
             selectedCardUIForMovement.Moving();
             int currentPointIndex = 0;
 
-            while (currentPointIndex + 1 < path.Count)
+            int maxPath = positions.Count;
+
+            while (currentPointIndex + 1 < maxPath)
             {
                 Vector3 startPosition = cardTilemap.CellToWorld(path[currentPointIndex]);
                 startPosition = new Vector3(startPosition.x, startPosition.y, 0);
                 Vector3 targetPosition = cardTilemap.CellToWorld(path[(currentPointIndex + 1)]);
                 targetPosition = new Vector3(targetPosition.x, targetPosition.y, 0);
+                
                 float currentLerpTime = 0f;
+
+
+                Vector3Int startCell = cardTilemap.WorldToCell(startPosition);
+                Vector3Int targetCell = cardTilemap.WorldToCell(targetPosition);
+
+                bool exceeded = false;
+                for (int i = 0; i < terrainTilemaps.Length; i++)
+                {
+                    Tile terrainTile = (Tile)terrainTilemaps[i].GetTile(targetCell);
+                    if (terrainTile != null)
+                    {
+                        TerrainInfo terrainTileInfo = terrainTile.gameObject.GetComponent<TerrainInfo>();
+                        if (terrainTileInfo != null)
+                        {
+                            TerrainsEnum terrainEnum = terrainTileInfo.terrainType;
+                            short movement = (currentPointIndex != 0) ? Terrains.movementCost[terrainEnum] : (short)0;
+
+                            if (selectedCardUIForMovement.GetCard().moved + movement > MovementConstants.characterMovement)
+                            {
+                                exceeded = true;
+                                break;
+                            }
+
+                            selectedCardUIForMovement.GetCard().AddMovement(movement);
+                            break;
+                        }
+                    }
+                }
+
+                if (exceeded)
+                    break;
 
                 while (currentLerpTime < 1f)
                 {
@@ -238,10 +278,9 @@ public class MoveOnTilemap : MonoBehaviour
                 }
 
                 currentPointIndex++;
-                Vector3Int targetCell = cardTilemap.WorldToCell(targetPosition);
                 selectedCardUIForMovement.GetCard().AddToHex(new Vector2Int(targetCell.x, targetCell.y));
 
-                fow.UpdateCardFOW(targetCell);
+                fow.UpdateCardFOW(targetCell, startCell);
 
                 CardInfo ci = ((Tile)cardTilemap.GetTile(targetCell)).gameObject.GetComponent<CardInfo>();
                 if (ci != null)
@@ -258,8 +297,26 @@ public class MoveOnTilemap : MonoBehaviour
                 manaPool.ToggleDirty();
             }
 
+            // LAST TILE
+            for (int i = 0; i < terrainTilemaps.Length; i++)
+            {
+                Tile terrainTile = (Tile)terrainTilemaps[i].GetTile(path[currentPointIndex]);
+                if (terrainTile != null)
+                {
+                    TerrainInfo terrainTileInfo = terrainTile.gameObject.GetComponent<TerrainInfo>();
+                    if (terrainTileInfo != null)
+                    {
+                        TerrainsEnum terrainEnum = terrainTileInfo.terrainType;
+                        short movement = (currentPointIndex != 0) ? Terrains.movementCost[terrainEnum] : (short)0;
+
+                        selectedCardUIForMovement.GetCard().AddMovement(movement);
+                        break;
+                    }
+                }
+            }
+
             // Ensure the GameObject stays at the last position in the path
-            Vector3 destination = cardTilemap.CellToWorld(path[path.Count - 1]);
+            Vector3 destination = cardTilemap.CellToWorld(path[currentPointIndex]);
             selectedCardUIForMovement.gameObject.transform.position = new Vector3(destination.x, destination.y, 0);
             selectedCardUIForMovement.StopMoving();
             selectedItems.UnselectCardDetails();
@@ -272,10 +329,57 @@ public class MoveOnTilemap : MonoBehaviour
 
     IEnumerator RenderPath()
     {
-        for(int p=0;p<path.Count;p++)
+        totalMovement = selectedCardUIForMovement.GetCard().moved;
+        for (int p=0;p<path.Count;p++)
         {
             //Movement Tilemap
             Vector3Int cardTilePos = path[p];
+
+            Vector3 cardCellCenter = cardTilemap.CellToWorld(cardTilePos);
+            cardCellCenter = new Vector3(cardCellCenter.x, cardCellCenter.y, -1);
+            positions.Add(cardCellCenter);
+
+            //Terrain Tilemap
+            Vector3Int terrainTilePos = cardTilePos;
+            bool found = false;
+            bool exceeded = false;
+            for (int i = 0; i < terrainTilemaps.Length; i++)
+            {
+                Tile terrainTile = (Tile)terrainTilemaps[i].GetTile(terrainTilePos);
+                if (terrainTile != null)
+                {
+                    TerrainInfo terrainTileInfo = terrainTile.gameObject.GetComponent<TerrainInfo>();
+                    if (terrainTileInfo != null)
+                    {
+                        TerrainsEnum terrainEnum = terrainTileInfo.terrainType;
+                        short movement = (p != 0) ? Terrains.movementCost[terrainEnum] : (short) 0;
+                        found = true;
+                        if (totalMovement + movement > MovementConstants.characterMovement)
+                        {
+                            exceeded = true;
+                            break;
+                        }
+                        totalMovement += movement;
+                        rightMovementCosts[positions.Count - 1].text = totalMovement.ToString();
+                        rightMovementCosts[positions.Count - 1].enabled = true;                        
+                        break;
+                    }
+                }
+            }
+            if (!found)
+                Debug.LogError("Terrain not found for " + terrainTilePos);
+            
+            if (exceeded)
+            {
+                StopAllCoroutines();
+                positions = positions.GetRange(0, p);
+                path = path.GetRange(0, p);
+                lineRenderer.positionCount = positions.Count;
+                lineRenderer.SetPositions(positions.ToArray());
+                break;
+            }
+
+
             Tile cardTile = (Tile)cardTilemap.GetTile(cardTilePos);
             if (cardTile == null)
             {
@@ -290,14 +394,12 @@ public class MoveOnTilemap : MonoBehaviour
                 StopAllCoroutines();
                 break;
             }
-            Vector3 cardCellCenter = cardTilemap.CellToWorld(cardTilePos);
-            cardCellCenter = new Vector3(cardCellCenter.x, cardCellCenter.y, -1);
 
             Sprite cardTileSprite = cardTilemap.GetSprite(cardTilePos);
             Tile newTile = ScriptableObject.CreateInstance<Tile>();
             newTile.sprite = cardTileSprite;
             movementTilemap.SetTile(cardTilePos, newTile);
-            positions.Add(cardCellCenter);
+
             lineRenderer.positionCount = positions.Count;
             lineRenderer.SetPositions(positions.ToArray());
 
@@ -318,32 +420,6 @@ public class MoveOnTilemap : MonoBehaviour
             rightMovementSprites[positions.Count - 1].sprite = spriteMovement;
             rightMovementSprites[positions.Count - 1].enabled = true;
 
-
-            //Terrain Tilemap
-            Vector3Int terrainTilePos = cardTilePos;
-            bool found = false;
-            for (int i = 0; i < terrainTilemaps.Length; i++)
-            {
-                Tile terrainTile = (Tile)terrainTilemaps[i].GetTile(terrainTilePos);
-                if (terrainTile != null)
-                {
-                    TerrainInfo terrainTileInfo = terrainTile.gameObject.GetComponent<TerrainInfo>();
-                    if (terrainTileInfo != null)
-                    {
-                        TerrainsEnum terrainEnum = terrainTileInfo.terrainType;
-                        short movement = Terrains.movementCost[terrainEnum];
-                        rightMovementCosts[positions.Count - 1].text = (totalMovement + movement).ToString();
-                        totalMovement += movement;
-                        rightMovementCosts[positions.Count - 1].enabled = true;
-                        found = true;
-                        break;
-                    }
-                }
-            }
-            if (!found)
-            {
-                Debug.LogError("Terrain not found for " + terrainTilePos);
-            }
             
         }
         yield return new WaitForSeconds(stepTime);

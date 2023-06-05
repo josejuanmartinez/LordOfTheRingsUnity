@@ -60,7 +60,7 @@ public class Board: MonoBehaviour
         }
         resourcesManager.Initialize(city.owner, city.GetDetails().production);
         if(city.owner == game.GetHumanPlayer().GetNation())
-            fowManager.UpdateCitiesFOW();
+            fowManager.UpdateCityFOW(city);
      }
     public void AddCard(Vector2Int hex, CardInPlay card)
     {
@@ -73,6 +73,9 @@ public class Board: MonoBehaviour
             BoardTile bt = tiles[hex];
             bt.AddCard(card);
         }
+        
+        if (card.owner == game.GetHumanPlayer().GetNation())
+            fowManager.UpdateCardFOW(card);
     }
 
     public Dictionary<Vector2Int, BoardTile> GetTiles()

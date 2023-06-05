@@ -7,4 +7,5 @@ public static class Sprites
     public static string prod = "<sprite name=production>";
     public static string prowess = "<sprite name=prowess>";
     public static string defence = "<sprite name=defence>";
+    public static string movement = "<sprite name=movement>";
 }

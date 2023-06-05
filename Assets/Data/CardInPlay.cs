@@ -125,4 +125,9 @@ public class CardInPlay : MonoBehaviour
         else
             return false;
     }
+
+    public void AddMovement(short movement)
+    {
+        moved += movement;
+    }
 }
