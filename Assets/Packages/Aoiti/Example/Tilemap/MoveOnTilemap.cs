@@ -238,7 +238,6 @@ public class MoveOnTilemap : MonoBehaviour
                 
                 float currentLerpTime = 0f;
 
-
                 Vector3Int startCell = cardTilemap.WorldToCell(startPosition);
                 Vector3Int targetCell = cardTilemap.WorldToCell(targetPosition);
 
@@ -252,7 +251,7 @@ public class MoveOnTilemap : MonoBehaviour
                         if (terrainTileInfo != null)
                         {
                             TerrainsEnum terrainEnum = terrainTileInfo.terrainType;
-                            short movement = (currentPointIndex != 0) ? Terrains.movementCost[terrainEnum] : (short)0;
+                            short movement = Terrains.movementCost[terrainEnum];
 
                             if (selectedCardUIForMovement.GetCard().moved + movement > MovementConstants.characterMovement)
                             {
@@ -298,6 +297,7 @@ public class MoveOnTilemap : MonoBehaviour
             }
 
             // LAST TILE
+            /*
             for (int i = 0; i < terrainTilemaps.Length; i++)
             {
                 Tile terrainTile = (Tile)terrainTilemaps[i].GetTile(path[currentPointIndex]);
@@ -313,7 +313,7 @@ public class MoveOnTilemap : MonoBehaviour
                         break;
                     }
                 }
-            }
+            }*/
 
             // Ensure the GameObject stays at the last position in the path
             Vector3 destination = cardTilemap.CellToWorld(path[currentPointIndex]);

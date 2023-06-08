@@ -21,6 +21,7 @@ public class CityUI : MonoBehaviour
     public Sprite darkSprite;
     public Sprite renegadeSprite;
     public Sprite neutralSprite;
+    public Sprite poiSprite;
 
     public bool isOpen = false;
     public bool isShownWithOtherCard = false;
@@ -81,20 +82,30 @@ public class CityUI : MonoBehaviour
                 break;
         }
 
-        switch(Nations.alignments[city.owner])
+        if(city.owner == NationsEnum.NONE)
         {
-            case AlignmentsEnum.NEUTRAL:
-                alignment.sprite = neutralSprite;
-                break;
-            case AlignmentsEnum.FREE_PEOPLE:
-                alignment.sprite = freeSprite;
-                break;
-            case AlignmentsEnum.DARK_SERVANTS:
-                alignment.sprite = darkSprite;
-                break;
-            case AlignmentsEnum.RENEGADE:
-                alignment.sprite = renegadeSprite;
-                break;
+            alignment.sprite = poiSprite;
+        }
+        else
+        {
+            switch (Nations.alignments[city.owner])
+            {
+                case AlignmentsEnum.NEUTRAL:
+                    alignment.sprite = neutralSprite;
+                    break;
+                case AlignmentsEnum.FREE_PEOPLE:
+                    alignment.sprite = freeSprite;
+                    break;
+                case AlignmentsEnum.DARK_SERVANTS:
+                    alignment.sprite = darkSprite;
+                    break;
+                case AlignmentsEnum.RENEGADE:
+                    alignment.sprite = renegadeSprite;
+                    break;
+                case AlignmentsEnum.NONE:
+                    alignment.sprite = poiSprite;
+                    break;
+            }
         }
 
         cityName.text = details.cityName + (details.isHaven ? "<sprite name=\"haven\">" : "");

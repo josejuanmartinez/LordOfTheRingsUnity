@@ -43,6 +43,7 @@ public class CityDetails: MonoBehaviour
     public bool isHidden = false;
     public bool hasPort = false;
     public bool hasHoard = false;
+    public bool isUnderground = false;
     public short iDrawFree;
     public short youDrawFree;
     public short iDrawDark;

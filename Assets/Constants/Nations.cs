@@ -32,7 +32,8 @@ public enum AlignmentsEnum
     DARK_SERVANTS,
     RENEGADE,
     NEUTRAL,
-    CHAOTIC
+    CHAOTIC,
+    NONE
 }
 
 public static class Nations

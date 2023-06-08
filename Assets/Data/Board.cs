@@ -161,7 +161,7 @@ public class Board: MonoBehaviour
 
         gameObject.transform.position = cellWorldCenter;
 
-        CardInPlay cardInPlay = instantiatedObject.GetComponent<CardInPlay>();        
+        CardInPlay cardInPlay = instantiatedObject.GetComponent<CardInPlay>();
         // Change OWNER
         cardInPlay.owner = turn.GetCurrentPlayer();
         // Change Moved

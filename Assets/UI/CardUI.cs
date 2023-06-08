@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -16,8 +18,12 @@ public class CardUI : MonoBehaviour
     public Button button;
     public Image icon;
     public CanvasGroup canvasGroup;
-    
-    private bool isShownWithOtherCard = false;
+    public CanvasGroup nextCanvasGroup;
+
+    private bool isShownWithCity = false;
+    private int cardPositionAtHex = 0;
+    private int totalCardsAtHex = 1;
+    private List<CardInPlay> allCards;
 
     public string id = Guid.NewGuid().ToString(); 
     
@@ -72,6 +78,7 @@ public class CardUI : MonoBehaviour
 
         RefreshAtHex();
         initialized = true;
+        Debug.Log("Initialized " + gameObject.name);
     }
 
     public void RefreshAtHex()
@@ -83,12 +90,16 @@ public class CardUI : MonoBehaviour
             currentPosition = cellWorldCenter;
         }
 
-        isShownWithOtherCard = board.GetTile(card.GetHex()).HasCity() && !isMoving;
+        isShownWithCity = board.GetTile(card.GetHex()).HasCity() && !isMoving;
+        allCards = board.GetTile(card.GetHex()).GetCards();
+        totalCardsAtHex = allCards.Count();
+        cardPositionAtHex = allCards.IndexOf(card);
 
-        short expectedHorizontalDisplacement = isShownWithOtherCard ? DisplacementPixels.right : DisplacementPixels.NONE;
+        short expectedHorizontalDisplacement = isShownWithCity ? DisplacementPixels.right : DisplacementPixels.NONE;
         Vector3 expectedDisplacementPosition = new Vector3(expectedHorizontalDisplacement, DisplacementPixels.down, 0);
         if (expectedDisplacementPosition != currentDisplacementPosition)
         {
+            Debug.Log("Correcting displacement of " + gameObject.name + ". Before: " + currentDisplacementPosition + " after: " + expectedDisplacementPosition);
             displacement.transform.localPosition = expectedDisplacementPosition;
             currentDisplacementPosition = expectedDisplacementPosition;
         }
@@ -112,18 +123,22 @@ public class CardUI : MonoBehaviour
             detailsObject.SetActive(isOpen);
 
         if (game.GetHumanPlayer().SeesTile(card.hex) != isVisible)
-        {
             isVisible = game.GetHumanPlayer().SeesTile(card.hex);
-            canvasGroup.alpha = isVisible ? 1 : 0;
-            canvasGroup.interactable = isVisible;
-            canvasGroup.blocksRaycasts = isVisible;
-        }        
+
+        isVisible = cardPositionAtHex > 0 ? false : isVisible;
 
         if (isVisible)
         {
             short movementLeft = (short)(MovementConstants.characterMovement - card.moved);
             movement.text = Sprites.movement + movementLeft.ToString();
+
+            nextCanvasGroup.alpha = totalCardsAtHex > 1 ? 1 : 0;
+            nextCanvasGroup.interactable = totalCardsAtHex > 1 ? true : false;
+            nextCanvasGroup.blocksRaycasts = totalCardsAtHex > 1 ? true : false;
         }
+        canvasGroup.alpha = isVisible ? 1 : 0;
+        canvasGroup.interactable = isVisible;
+        canvasGroup.blocksRaycasts = isVisible;
 
         RefreshAtHex();
     }
@@ -169,5 +184,12 @@ public class CardUI : MonoBehaviour
     public void StopMoving()
     {
         isMoving = false;
+    }
+
+    public void Next()
+    {
+        int newPosition = allCards.Count - 1;
+        allCards.Remove(card);
+        allCards.Insert(newPosition, card);
     }
 }

@@ -59,6 +59,9 @@ public enum AutomaticAttackEnum
     Dwarves28,
     Dwarves39,
     Undead28CorruptionMinusTwoCheckIfWounded,
+    Spiders37,
+    StormAll5,
+    Plant210
 }
 
 public struct AutomaticAttackStruct
@@ -127,9 +130,12 @@ public static class AutomaticAttack
         { AutomaticAttackEnum.Elves210, new AutomaticAttackStruct(RacesEnum.Elf, 2, 10, 0) },
         { AutomaticAttackEnum.Elves310CancelledIfLessThanSixDetainmentIfLessThan12, new AutomaticAttackStruct(RacesEnum.Elf, 3, 10, 0) },
         { AutomaticAttackEnum.Orcs47, new AutomaticAttackStruct(RacesEnum.Orc, 4, 7, 0) },
-        { AutomaticAttackEnum.Traps210DetaintmentIfElf, new AutomaticAttackStruct(RacesEnum.Orc, 2, 10, 0) },
+        { AutomaticAttackEnum.Traps210DetaintmentIfElf, new AutomaticAttackStruct(RacesEnum.Trap, 2, 10, 0) },
         { AutomaticAttackEnum.Dragon114, new AutomaticAttackStruct(RacesEnum.Dragon, 1, 14, 0) },
-        { AutomaticAttackEnum.Dwarves28, new AutomaticAttackStruct(RacesEnum.Dragon, 2, 8, 0) },
-        { AutomaticAttackEnum.Dwarves39, new AutomaticAttackStruct(RacesEnum.Dragon, 3, 9, 0) },
+        { AutomaticAttackEnum.Dwarves28, new AutomaticAttackStruct(RacesEnum.Dwarf, 2, 8, 0) },
+        { AutomaticAttackEnum.Dwarves39, new AutomaticAttackStruct(RacesEnum.Dwarf, 3, 9, 0) },
+        { AutomaticAttackEnum.Spiders37, new AutomaticAttackStruct(RacesEnum.Spider, 3, 7, 0) },
+        { AutomaticAttackEnum.StormAll5, new AutomaticAttackStruct(RacesEnum.Weather, -1, 5, 0) },
+        { AutomaticAttackEnum.Plant210, new AutomaticAttackStruct( RacesEnum.Plant, 2, 10, 0) },
     };
 }

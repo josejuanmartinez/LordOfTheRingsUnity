@@ -19,7 +19,8 @@ public enum RacesEnum
     Plant,
     Bear,
     Dragon,
-    Maia
+    Maia,
+    Weather
 }
 
 public enum SubRacesEnum

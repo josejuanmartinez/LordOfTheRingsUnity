@@ -561,6 +561,7 @@ MonoBehaviour:
   darkSprite: {fileID: -6139764989666716157, guid: 2de068668f1a68b4c9f27461e69efdb5, type: 3}
   renegadeSprite: {fileID: 21300000, guid: 1941d064f19c8184c8f847d626e916a3, type: 3}
   neutralSprite: {fileID: 21300000, guid: ee3b2de559fa5f34e94b7a72054dac01, type: 3}
+  poiSprite: {fileID: 21300000, guid: b4a4ebb07dd65af4394631b6ed66ec86, type: 3}
   isOpen: 0
   isShownWithOtherCard: 1
   id: c5e3d028-93b8-4264-b129-3516e861def4
