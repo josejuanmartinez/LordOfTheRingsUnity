@@ -35,4 +35,9 @@ public class CharacterManager
         List<CardInPlay> character = GetCharactersOfPlayer(owner);
         return character.First(x => x.IsAvatar());
     }
+
+    public List<CardInPlay> GetCharactersInCompanyOf(CardDetails leader)
+    {
+        return board.GetTiles().Values.SelectMany(x => x.GetCards()).Where(y => y.GetCompanyLeader() == leader.cardName).ToList();
+    }
 }

@@ -51,9 +51,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49007e364c576de448b69e25d8d71fb3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardSprite: {fileID: -4009803318906322448, guid: e2415d835b6f7ca4283438facaa2ba4c,
-    type: 3}
-  cardIcon: {fileID: 21300000, guid: fffb41b45086e034fb29829d2dd6ab75, type: 3}
+  cardSprite: {fileID: -4009803318906322448, guid: e2415d835b6f7ca4283438facaa2ba4c, type: 3}
   cardId: doeth
   groupId: doeth
   cardName: Doeth (Durthak)
@@ -61,6 +59,7 @@ MonoBehaviour:
   alignment: 1
   isUnique: 1
   victoryPoints: 1
+  victoryPointsModifierIfEliminated: 0
   corruption: 0
 --- !u!114 &5521050241251941657
 MonoBehaviour:
@@ -76,10 +75,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isAvatar: 0
   race: 6
+  subRace: 0
   classes: 0000000002000000
   abilities: 05000000
-  homeTown: any_dark
+  homeTown:
+  - any_dark
   isAgent: 0
+  isWinged: 0
+  isLeader: 0
+  isElvenLord: 0
+  isDwarfLord: 0
+  isInmovable: 0
+  globalInfluenceModifier: 0
   prowess: 4
   defence: 9
   mind: 4

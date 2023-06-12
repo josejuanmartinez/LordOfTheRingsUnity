@@ -51,8 +51,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49007e364c576de448b69e25d8d71fb3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardSprite: {fileID: -830030167784122433, guid: a9e7265c41463b844a6c39e4ebe206ad,
-    type: 3}
+  cardSprite: {fileID: -830030167784122433, guid: a9e7265c41463b844a6c39e4ebe206ad, type: 3}
   cardId: radagast_shadowed_wanderer
   groupId: radagast
   cardName: Radagast Shadowed Wanderer
@@ -79,7 +78,8 @@ MonoBehaviour:
   subRace: 0
   classes: 01000000040000000000000003000000
   abilities: 2c0000002d0000002e0000002f00000030000000
-  homeTown: rhosgobel
+  homeTown:
+  - rhosgobel
   isAgent: 0
   isWinged: 0
   isLeader: 0

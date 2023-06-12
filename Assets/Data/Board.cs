@@ -20,7 +20,9 @@ public class Board: MonoBehaviour
     private Turn turn;
     private Tilemap t;
     private FOWManager fowManager;
+    private MovementManager movementManager;
     private Game game;
+    private DeckManager deckManager;
 
     private Transform cardsCanvasTransform;
     private SelectedItems selectedItems;
@@ -39,6 +41,8 @@ public class Board: MonoBehaviour
         t = GameObject.Find("CardTypeTilemap").GetComponent<Tilemap>();
         selectedItems = GameObject.Find("SelectedItems").GetComponent<SelectedItems>();
         fowManager = GameObject.Find("FOWManager").GetComponent<FOWManager>();
+        movementManager = GameObject.Find("MovementManager").GetComponent<MovementManager>();
+        deckManager = GameObject.Find("Deck").GetComponent<DeckManager>();
         initialized = true;
     }
 
@@ -141,17 +145,54 @@ public class Board: MonoBehaviour
         {
             case SpawnCardLocation.AtHaven:
                 city = cityManager.GetHavenOfPlayer(turn.GetCurrentPlayer());
-                hex = city.hex;
-                success = true;
+                if(city != null)
+                {
+                    hex = city.hex;
+                    success = true;
+                }
+                else
+                {
+                    Debug.Log("Trying to instantiate at haven but player does not have a haven");
+                    success = false;
+                }                
                 break;
             case SpawnCardLocation.AtHomeTown:
-                city = cityManager.GetCityOfPlayer(turn.GetCurrentPlayer(), cardDetails.GetCharacterCardDetails().homeTown);
-                hex = city.hex;
-                success = true;
+                if (cardDetails.GetCharacterCardDetails() != null)
+                {
+                    CharacterCardDetails character = cardDetails.GetCharacterCardDetails();
+                    success = false;
+                    // THIS WILL ALREADY TAKE INTO ACCOUNT "ANY" hometowns
+                    foreach(string homeTown in character.homeTown)
+                    {
+                        city = cityManager.GetCityOfPlayer(turn.GetCurrentPlayer(), homeTown);
+                        if (city != null)
+                        {
+                            hex = city.hex;
+                            success = true;
+                        }
+                    }
+                }
+                else
+                {
+                    Debug.LogError("Card does not have CharacteDetails but it is trying to instantiate at hometown.");
+                    success = false;
+                }
+                    
                 break;
             case SpawnCardLocation.AtLastCell:
-                hex = selectedItems.GetSelectedCharacter().GetCard().hex;
-                success = true;
+                if(movementManager.GetLastHex() != MovementManager.NULL2)
+                {
+                    hex = movementManager.GetLastHex();
+                    success = true;
+                }
+                else
+                {
+                    Debug.LogError("Unable to instantiate at last hex.");
+                    if (instantiatedObject)
+                        DestroyImmediate(instantiatedObject);
+                    success = false;
+                }
+                    
                 break;
         }
         if (!success || hex == Vector2.one * int.MinValue)
@@ -165,12 +206,13 @@ public class Board: MonoBehaviour
         // Change OWNER
         cardInPlay.owner = turn.GetCurrentPlayer();
         // Change Moved
-        cardInPlay.moved = 0;
+        cardInPlay.moved = MovementConstants.characterMovement;
         // HEX
         cardInPlay.hex = hex;
         // Finally this will trigger Initialize in CardInPLay, and then CardUI
         cardInPlay.cardId = cardId;
 
+        deckManager.DiscardAndDraw(cardDetails);
         return true;
     }
 }

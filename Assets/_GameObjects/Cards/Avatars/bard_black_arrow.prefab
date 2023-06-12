@@ -59,6 +59,7 @@ MonoBehaviour:
   alignment: 0
   isUnique: 1
   victoryPoints: 0
+  victoryPointsModifierIfEliminated: 0
   corruption: 0
 --- !u!114 &2156722876768731498
 MonoBehaviour:
@@ -77,10 +78,13 @@ MonoBehaviour:
   subRace: 0
   classes: 0000000003000000
   abilities: 1f0000001c000000200000001b000000
-  homeTown: dale
+  homeTown:
+  - lake_town
   isAgent: 0
   isWinged: 0
   isLeader: 0
+  isElvenLord: 0
+  isDwarfLord: 0
   isInmovable: 0
   globalInfluenceModifier: 0
   prowess: 4

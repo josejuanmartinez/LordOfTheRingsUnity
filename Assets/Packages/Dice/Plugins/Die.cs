@@ -49,12 +49,33 @@ public class Die : MonoBehaviour {
 
     public bool rotateFirst = true;
 
+    public float velocity;
+    public float angularVelocity;
+
+    public bool velocityRolling = true;
+    public bool angularVelocityRolling = true;
+
+    public bool isRolling = false;
+
     // true is die is still rolling
     public bool rolling
     {
-        get
+    get
         {
-            return !(GetComponent<Rigidbody>().velocity.sqrMagnitude < .1F && GetComponent<Rigidbody>().angularVelocity.sqrMagnitude < .1F);
+            velocity = GetComponent<Rigidbody>().velocity.sqrMagnitude;
+            angularVelocity = GetComponent<Rigidbody>().angularVelocity.sqrMagnitude;
+            if (velocity < .01F)
+                velocityRolling = false;
+            else
+                velocityRolling = true;
+
+            if (angularVelocity < .01F)
+                angularVelocityRolling = false;
+            else
+                angularVelocityRolling = true;
+
+            isRolling = velocityRolling || angularVelocityRolling;
+            return isRolling;
         }
     }
 
@@ -115,7 +136,7 @@ public class Die : MonoBehaviour {
             side++;
 			// if we got a Vector.zero as the testHitVector we have checked all sides of this die
         } while (testHitVector != Vector3.zero);
-        GetComponent<Rigidbody>().isKinematic = true;
+        //GetComponent<Rigidbody>().isKinematic = true;
     }
 
     private void Awake()

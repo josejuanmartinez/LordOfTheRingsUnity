@@ -46,10 +46,8 @@ public class SimpleTooltip : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     private void Update()
     {
         if (Input.GetKeyUp(KeyCode.Escape))
-        {
             HideTooltip();
-        }
-
+        
         if (!cursorInside)
             return;
 

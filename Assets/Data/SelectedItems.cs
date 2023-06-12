@@ -1,3 +1,5 @@
+using NUnit.Framework;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class SelectedItems : MonoBehaviour
@@ -5,15 +7,25 @@ public class SelectedItems : MonoBehaviour
     private CardDetails selectedCardDetails;
     private CityDetails selectedCityDetails;
 
-    private MoveOnTilemap moveOnTilemap;
+    private List<CardInPlay> selectedCompany;
+
+    private MovementManager moveOnTilemap;
     private PlaceDeck placeDeck;
+    private Board board;
 
     private bool isDeck = false;
 
     private void Awake()
     {
-        moveOnTilemap = GameObject.Find("Movement").GetComponent<MoveOnTilemap>();
+        moveOnTilemap = GameObject.Find("MovementManager").GetComponent<MovementManager>();
         placeDeck = GameObject.Find("PlaceDeck").GetComponent<PlaceDeck>();
+        board = GameObject.Find("Board").GetComponent<Board>();
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyUp(KeyCode.Escape))
+            UnselectAll();
     }
 
     public void SelectCityDetails(CityDetails city)
@@ -27,19 +39,21 @@ public class SelectedItems : MonoBehaviour
         selectedCityDetails = null;
     }
 
-    public void SelectCardDetails(CardDetails card, bool isDeck)
+    public void SelectCardDetails(CardDetails cardDetails, bool isDeck)
     {
-        selectedCityDetails = null;
-        selectedCardDetails = card;
-        this.isDeck = isDeck;
-    }
-    public void SelectCardDetails(CardDetails card)
-    {
-        selectedCityDetails = null;
-        selectedCardDetails = card;
-        isDeck = false;
+        SelectCardDetails(null, cardDetails, isDeck);
     }
 
+    public void SelectCardDetails(CardUI cardUI, CardDetails cardDetails, bool isDeck)
+    {
+        selectedCityDetails = null;
+        selectedCardDetails = cardDetails;
+
+        // COMPANY
+        selectedCompany = board.GetCharacterManager().GetCharactersInCompanyOf(cardDetails);
+
+        this.isDeck = isDeck;
+    }
 
     public void UnselectCardDetails()
     {
@@ -94,15 +108,13 @@ public class SelectedItems : MonoBehaviour
 
     public void SelectCardUI(CardUI cardUI)
     {
-        SelectCardDetails(cardUI.GetCard().GetDetails());
-        moveOnTilemap.SetSelectedCardUIForMovement(cardUI);
+        SelectCardDetails(cardUI, cardUI.GetCard().GetDetails(), false);
         placeDeck.SetOpenGUID(cardUI.id);
     }
 
     public void UnselectCardUI()
     {
         UnselectCardDetails();
-        moveOnTilemap.SetSelectedCardUIForMovement(null);
     }
 
     public void UnselectCityUI()
@@ -110,9 +122,12 @@ public class SelectedItems : MonoBehaviour
         UnselectCityDetails();
     }
 
-    public CardUI GetSelectedCharacter()
+    public CardUI GetSelectedCardUI()
     {
-        return moveOnTilemap.GetSelectedCardUIForMovement();
+        // There may not be a selected OR there may be a selected card in Deck (not in play)
+        if (selectedCardDetails != null && selectedCardDetails.GetCardInPlay() != null)
+            return selectedCardDetails.GetCardInPlay().GetCardUI();
+        else return null;
     }
 
     public HazardCreatureCardDetails GetHazardCreatureCardDetails()
@@ -147,5 +162,10 @@ public class SelectedItems : MonoBehaviour
         selectedCardDetails = null;
         selectedCityDetails = null;
         isDeck = false;
+    }
+
+    public List<CardInPlay> GetCompany()
+    {
+        return selectedCompany;
     }
 }

@@ -51,8 +51,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49007e364c576de448b69e25d8d71fb3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardSprite: {fileID: -2206459929527268849, guid: 399148e46117e7a4eacc800dc8a1f206,
-    type: 3}
+  cardSprite: {fileID: -2206459929527268849, guid: 399148e46117e7a4eacc800dc8a1f206, type: 3}
   cardId: thranduil_of_mirkwood
   groupId: thranduil
   cardName: Thranduil of Mirkwook
@@ -60,6 +59,7 @@ MonoBehaviour:
   alignment: 0
   isUnique: 1
   victoryPoints: 1
+  victoryPointsModifierIfEliminated: 0
   corruption: 0
 --- !u!114 &2156722876768731498
 MonoBehaviour:
@@ -78,7 +78,8 @@ MonoBehaviour:
   subRace: 2
   classes: 000000000300000002000000
   abilities: 2500000026000000160000002800000027000000
-  homeTown: thranduil_halls
+  homeTown:
+  - thranduil_halls
   isAgent: 0
   isWinged: 0
   isLeader: 1

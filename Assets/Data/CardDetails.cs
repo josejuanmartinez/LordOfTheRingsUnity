@@ -37,7 +37,7 @@ public class CardDetails : MonoBehaviour
         if (!isInPlay)
             return null;
         else
-            return gameObject.GetComponent<CardInPlay>();
+            return transform.parent.GetComponent<CardInPlay>();
     }
 
     public HazardCreatureCardDetails GetHazardCreatureCardDetails()

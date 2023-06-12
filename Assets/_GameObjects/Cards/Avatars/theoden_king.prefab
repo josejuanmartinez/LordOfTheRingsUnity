@@ -51,8 +51,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49007e364c576de448b69e25d8d71fb3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardSprite: {fileID: -613816314744537633, guid: efdd11e2a8436ed4cb403409c5dd8eb3,
-    type: 3}
+  cardSprite: {fileID: -613816314744537633, guid: efdd11e2a8436ed4cb403409c5dd8eb3, type: 3}
   cardId: theoden_king
   groupId: theoden
   cardName: "Th\xE9oden King"
@@ -60,6 +59,7 @@ MonoBehaviour:
   alignment: 0
   isUnique: 1
   victoryPoints: 0
+  victoryPointsModifierIfEliminated: 0
   corruption: 0
 --- !u!114 &2156722876768731498
 MonoBehaviour:
@@ -78,10 +78,13 @@ MonoBehaviour:
   subRace: 0
   classes: 000000000400000002000000
   abilities: 1400000015000000160000001700000018000000
-  homeTown: edoras
+  homeTown:
+  - edoras
   isAgent: 0
   isWinged: 0
   isLeader: 1
+  isElvenLord: 0
+  isDwarfLord: 0
   isInmovable: 0
   globalInfluenceModifier: -3
   prowess: 5

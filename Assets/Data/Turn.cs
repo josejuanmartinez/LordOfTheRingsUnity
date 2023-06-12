@@ -34,6 +34,7 @@ public class Turn : MonoBehaviour
                 CardInPlay avatar = board.GetCharacterManager().GetAvatar(game.GetHumanPlayer().GetNation());
                 if (avatar)
                     cameraController.LookToCard(avatar);
+                currentTurnPlayer = game.GetHumanPlayer().GetNation();
                 isNewTurn = false;
             }
         }

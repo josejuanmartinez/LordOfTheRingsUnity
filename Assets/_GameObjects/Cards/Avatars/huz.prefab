@@ -59,6 +59,7 @@ MonoBehaviour:
   alignment: 3
   isUnique: 1
   victoryPoints: 0
+  victoryPointsModifierIfEliminated: 0
   corruption: 0
 --- !u!114 &2156722876768731498
 MonoBehaviour:
@@ -77,10 +78,13 @@ MonoBehaviour:
   subRace: 0
   classes: 0000000004000000
   abilities: 23000000
-  homeTown: riavod
+  homeTown:
+  - riavod
   isAgent: 0
   isWinged: 0
   isLeader: 1
+  isElvenLord: 0
+  isDwarfLord: 0
   isInmovable: 0
   globalInfluenceModifier: 0
   prowess: 5

@@ -6,8 +6,10 @@ using Aoiti.Pathfinding;
 using UnityEngine.UI;
 using TMPro;
 using Unity.VisualScripting;
+using System.Net;
+using System.Xml;
 
-public class MoveOnTilemap : MonoBehaviour
+public class MovementManager : MonoBehaviour
 {
     public static Vector3Int[] directionsEvenY = new Vector3Int[6] {Vector3Int.left, Vector3Int.left + Vector3Int.up, Vector3Int.up,
                                                  Vector3Int.right,Vector3Int.down, Vector3Int.left + Vector3Int.down};
@@ -15,10 +17,15 @@ public class MoveOnTilemap : MonoBehaviour
     public static Vector3Int[] directionsUnevenY = new Vector3Int[6] {Vector3Int.left, Vector3Int.up, Vector3Int.right + Vector3Int.up,
                                                  Vector3Int.right,Vector3Int.right + Vector3Int.down, Vector3Int.down};
 
-    public Tilemap[] terrainTilemaps;    
+    public Tilemap[] terrainTilemaps;
     public LineRenderer lineRenderer;
     public Image[] rightMovementSprites;
     public TextMeshProUGUI[] rightMovementCosts;
+    public GameObject charactersGameObject;
+    
+    public GameObject characterGroupPrefab;
+    public CharacterGroupManager leaderCharacterGroup;    
+    
     public float speed = 1f;
 
     
@@ -34,8 +41,6 @@ public class MoveOnTilemap : MonoBehaviour
     private FOWManager fow;
     // ****************************************
     
-    private CardUI selectedCardUIForMovement;
-
     private List<Vector3> positions = new List<Vector3>();
     private short totalMovement = 0;
 
@@ -43,15 +48,18 @@ public class MoveOnTilemap : MonoBehaviour
 
     private Pathfinder<Vector3Int> pathfinder;
 
-    private static Vector3Int NULL = Vector3Int.one * int.MinValue;
-    
+    public static Vector3Int NULL = Vector3Int.one * int.MinValue;
+    public static Vector2Int NULL2 = Vector2Int.one * int.MinValue;
+
     private Vector3Int showingPathDestination = NULL;
 
     private CameraController cameraController;
 
     private List<Vector3Int> path;
 
-    
+    private CardUI lastSelected = null;
+
+    private Vector2Int lastHex = NULL2;
 
     [System.Serializable]
     public struct TileAndMovementCost
@@ -64,12 +72,10 @@ public class MoveOnTilemap : MonoBehaviour
     [Range(0.001f,1f)]
     public float stepTime;
 
-
     public float DistanceFunc(Vector3Int a, Vector3Int b)
     {
         return (a-b).sqrMagnitude;
     }
-
 
     public Dictionary<Vector3Int,float> connectionsAndCosts(Vector3Int a)
     {
@@ -100,6 +106,8 @@ public class MoveOnTilemap : MonoBehaviour
         cellHover = tilemapSelector.GetComponent<CellHover>();
         selectedItems = GameObject.Find("SelectedItems").GetComponent<SelectedItems>();
         fow = GameObject.Find("FOWManager").GetComponent<FOWManager>();
+
+        charactersGameObject.SetActive(false);
 
         BoundsInt bounds = terrainTilemaps[0].cellBounds;
         TileBase[][] allTiles = new TileBase[terrainTilemaps.Length][];
@@ -153,9 +161,36 @@ public class MoveOnTilemap : MonoBehaviour
     {
         if (selectedItems.IsCharSelected())
         {
+            CardUI cardUI = selectedItems.GetSelectedCardUI();
+            if (cardUI == null)
+                return;
+            CardInPlay card = cardUI.GetCard();
             Vector2Int hexSelected = board.GetSelectedHex();
             Vector3Int currentCellPos = new Vector3Int(hexSelected.x, hexSelected.y, 0);
             Vector3Int target = cellHover.last;
+
+            if (cardUI != lastSelected)
+            {
+                charactersGameObject.SetActive(true);
+                // LEADER: Already painted, just update
+                leaderCharacterGroup.Initialize(card);
+                lastSelected = cardUI;
+
+                // COMPANY: Paint
+                //1. I clean all except leader (child==0)
+                int childs = charactersGameObject.transform.childCount;
+                for (int i = childs - 1; i > 0; i--)
+                    Destroy(charactersGameObject.transform.GetChild(i).gameObject);
+                //2. I add characters
+                foreach(CardInPlay charInCompany in selectedItems.GetCompany())
+                {
+                    GameObject charInstantiated = Instantiate(characterGroupPrefab, charactersGameObject.transform);
+                    CharacterGroupManager charGroup = charInstantiated.GetComponent<CharacterGroupManager>();
+                    charGroup.Initialize(charInCompany);
+                }
+
+                //TODO: Add the rest (ally, objects)
+            }
 
             if (currentCellPos == target)
             {
@@ -186,6 +221,10 @@ public class MoveOnTilemap : MonoBehaviour
                 cameraController.preventDrag = false;
 
             }
+        } else
+        {
+            charactersGameObject.SetActive(false);
+            lastSelected = null;
         }
     }
 
@@ -204,19 +243,15 @@ public class MoveOnTilemap : MonoBehaviour
         lineRenderer.SetPositions(positions.ToArray());
     }
 
-    public CardUI GetSelectedCardUIForMovement()
-    {
-        return selectedCardUIForMovement;
-    }
-
-    public void SetSelectedCardUIForMovement(CardUI cardUI)
-    {
-        selectedCardUIForMovement = cardUI;
-    }
-
-
     IEnumerator MovePath()
     {
+        CardUI selectedCardUIForMovement = selectedItems.GetSelectedCardUI();
+        if(selectedCardUIForMovement == null)
+        {
+            Reset();
+            yield return null;
+        }
+
         if (selectedCardUIForMovement != null)
         {
             if (selectedCardUIForMovement.GetCard().moved >= MovementConstants.characterMovement)
@@ -296,31 +331,14 @@ public class MoveOnTilemap : MonoBehaviour
                 manaPool.ToggleDirty();
             }
 
-            // LAST TILE
-            /*
-            for (int i = 0; i < terrainTilemaps.Length; i++)
-            {
-                Tile terrainTile = (Tile)terrainTilemaps[i].GetTile(path[currentPointIndex]);
-                if (terrainTile != null)
-                {
-                    TerrainInfo terrainTileInfo = terrainTile.gameObject.GetComponent<TerrainInfo>();
-                    if (terrainTileInfo != null)
-                    {
-                        TerrainsEnum terrainEnum = terrainTileInfo.terrainType;
-                        short movement = (currentPointIndex != 0) ? Terrains.movementCost[terrainEnum] : (short)0;
-
-                        selectedCardUIForMovement.GetCard().AddMovement(movement);
-                        break;
-                    }
-                }
-            }*/
-
             // Ensure the GameObject stays at the last position in the path
             Vector3 destination = cardTilemap.CellToWorld(path[currentPointIndex]);
             selectedCardUIForMovement.gameObject.transform.position = new Vector3(destination.x, destination.y, 0);
             selectedCardUIForMovement.StopMoving();
             selectedItems.UnselectCardDetails();
-            selectedCardUIForMovement.GetCard().hex = new Vector2Int(path[path.Count - 1].x, path[path.Count - 1].y);
+            lastHex = new Vector2Int(path[path.Count - 1].x, path[path.Count - 1].y);
+            selectedCardUIForMovement.GetCard().SetHex(lastHex);
+
         } else
         {
             Reset();
@@ -329,6 +347,13 @@ public class MoveOnTilemap : MonoBehaviour
 
     IEnumerator RenderPath()
     {
+        CardUI selectedCardUIForMovement = selectedItems.GetSelectedCardUI();
+        if (selectedCardUIForMovement == null)
+        {
+            Reset();
+            yield return null;
+        }
+
         totalMovement = selectedCardUIForMovement.GetCard().moved;
         for (int p=0;p<path.Count;p++)
         {
@@ -423,6 +448,10 @@ public class MoveOnTilemap : MonoBehaviour
             
         }
         yield return new WaitForSeconds(stepTime);
+    }
+    public Vector2Int GetLastHex()
+    {
+        return lastHex;
     }
 }
 

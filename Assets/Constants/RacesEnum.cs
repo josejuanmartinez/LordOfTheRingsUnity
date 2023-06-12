@@ -31,5 +31,6 @@ public enum SubRacesEnum
     Noldo,
     Fire,
     Cold,
-    Ice
+    Ice,
+    OlogHai
 }

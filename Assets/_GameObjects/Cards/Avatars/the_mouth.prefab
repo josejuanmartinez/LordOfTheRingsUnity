@@ -59,6 +59,7 @@ MonoBehaviour:
   alignment: 1
   isUnique: 1
   victoryPoints: 3
+  victoryPointsModifierIfEliminated: 0
   corruption: 0
 --- !u!114 &2156722876768731498
 MonoBehaviour:
@@ -74,10 +75,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isAvatar: 1
   race: 0
+  subRace: 0
   classes: 0000000004000000
   abilities: 0f0000000c00000010000000
-  homeTown: barad_dur
+  homeTown:
+  - barad_dur
   isAgent: 1
+  isWinged: 0
+  isLeader: 0
+  isElvenLord: 0
+  isDwarfLord: 0
+  isInmovable: 0
   globalInfluenceModifier: 0
   prowess: 6
   defence: 8

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -7,6 +8,7 @@ public class CardDetailsRepo : MonoBehaviour
 {
     private Dictionary<string, GameObject> cardDetailsDict = new Dictionary<string, GameObject>();
     private Dictionary<string, GameObject> cityDetailsDict = new Dictionary<string, GameObject>();
+    private Dictionary<NationsEnum, List<string>> cardNationDictionary = new Dictionary<NationsEnum, List<string>>();
 
     private bool isInitialized = false;
 
@@ -15,9 +17,21 @@ public class CardDetailsRepo : MonoBehaviour
         string[] deckCards = AssetDatabase.FindAssets("t:prefab", new string[] { "Assets/_GameObjects/Cards/Decks" });
         foreach (var guid in deckCards)
         {
-            var path = AssetDatabase.GUIDToAssetPath(guid);
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            string nation = path.Replace("Assets/_GameObjects/Cards/Decks/", "").Split('/')[0].ToUpper();
             GameObject go = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             cardDetailsDict[go.name] = go;
+
+            NationsEnum nationsEnum;
+
+            if (Enum.TryParse<NationsEnum>(nation, out nationsEnum))
+            {
+                if(!cardNationDictionary.ContainsKey(nationsEnum))
+                    cardNationDictionary[nationsEnum] = new List<string>();
+                cardNationDictionary[nationsEnum].Add(go.name);
+            }                
+            else
+                Debug.LogError("Unable to parse leader " + nation);                
         }
 
         string[] avatarCards = AssetDatabase.FindAssets("t:prefab", new string[] { "Assets/_GameObjects/Cards/Avatars" });
@@ -54,4 +68,8 @@ public class CardDetailsRepo : MonoBehaviour
 
     public bool IsInitialized() { return isInitialized; }
 
+    public List<string> GetCardNamesOfNation(NationsEnum nation)
+    {
+        return cardNationDictionary[nation];
+    }
 }

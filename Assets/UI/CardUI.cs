@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
@@ -10,13 +11,21 @@ using UnityEngine.UI;
 public class CardUI : MonoBehaviour
 {
     public GameObject displacement;
-    public GameObject detailsObject;
+    //public GameObject detailsObject;
     public TextMeshProUGUI cardName;
-    public TextMeshProUGUI prowess;
-    public TextMeshProUGUI defence;
-    public TextMeshProUGUI movement;
+    //public TextMeshProUGUI prowess;
+    //public TextMeshProUGUI defence;
+    //public TextMeshProUGUI movement;
+
+    public Sprite freeSprite;
+    public Sprite darkSprite;
+    public Sprite renegadeSprite;
+    public Sprite neutralSprite;
+    public Sprite chaosSprite;
+
     public Button button;
     public Image icon;
+    public Image frame;
     public CanvasGroup canvasGroup;
     public CanvasGroup nextCanvasGroup;
 
@@ -31,6 +40,9 @@ public class CardUI : MonoBehaviour
     
     private Board board;
     private CardInPlay card;
+    private MovementManager moveOnTilemap;
+    private ColorManager colorManager;
+    private PopupManager popupManager;
 
     private bool isMoving = false;
     private bool initialized = false;
@@ -42,14 +54,20 @@ public class CardUI : MonoBehaviour
 
     private Vector3 currentDisplacementPosition = Vector3.zero;
     private Vector3 currentPosition = Vector3.zero;
+    
+    private CardInPlay potentialLeader;
+    private HashSet<CardInPlay> rejectedMerges = new HashSet<CardInPlay>();
 
     void Awake()
     {
         board = GameObject.Find("Board").GetComponent<Board>();
         game = GameObject.Find("Game").GetComponent<Game>();
         selectedItems = GameObject.Find("SelectedItems").GetComponent<SelectedItems>();
-        detailsObject.SetActive(false);
+        //detailsObject.SetActive(false);
         t = GameObject.Find("CardTypeTilemap").GetComponent<Tilemap>();
+        moveOnTilemap = GameObject.Find("MovementManager").GetComponent<MovementManager>();
+        colorManager = GameObject.Find("ColorManager").GetComponent<ColorManager>();
+        popupManager = GameObject.Find("PopupManager").GetComponent<PopupManager>();
     }
 
     public void Initialize()
@@ -64,17 +82,7 @@ public class CardUI : MonoBehaviour
 
         cardName.text = card.GetDetails().cardName;
         icon.sprite = card.GetDetails().cardSprite;
-
-        if (card.GetDetails().cardClass == CardClass.Character)
-        {
-            short prowessValue = card.GetCharacterDetails().prowess;
-            short defenceValue = card.GetCharacterDetails().defence;
-            short movementLeft = MovementConstants.characterMovement;
-
-            prowess.text = Sprites.prowess + prowessValue.ToString();
-            defence.text = Sprites.defence + defenceValue.ToString();
-            movement.text = Sprites.movement + movementLeft.ToString();
-        }
+        frame.color = colorManager.GetColor(card.owner);
 
         RefreshAtHex();
         initialized = true;
@@ -92,14 +100,22 @@ public class CardUI : MonoBehaviour
 
         isShownWithCity = board.GetTile(card.GetHex()).HasCity() && !isMoving;
         allCards = board.GetTile(card.GetHex()).GetCards();
-        totalCardsAtHex = allCards.Count();
+        totalCardsAtHex = 0;
+        foreach(CardInPlay c in allCards)
+        {
+            if(c.GetCompanyLeader() == null)
+            {
+                totalCardsAtHex++;
+            }
+        }
+        //totalCardsAtHex = allCards.Select(x => x.GetCompanyLeader() == null).Count();
         cardPositionAtHex = allCards.IndexOf(card);
 
         short expectedHorizontalDisplacement = isShownWithCity ? DisplacementPixels.right : DisplacementPixels.NONE;
         Vector3 expectedDisplacementPosition = new Vector3(expectedHorizontalDisplacement, DisplacementPixels.down, 0);
         if (expectedDisplacementPosition != currentDisplacementPosition)
         {
-            Debug.Log("Correcting displacement of " + gameObject.name + ". Before: " + currentDisplacementPosition + " after: " + expectedDisplacementPosition);
+            //Debug.Log("Correcting displacement of " + gameObject.name + ". Before: " + currentDisplacementPosition + " after: " + expectedDisplacementPosition);
             displacement.transform.localPosition = expectedDisplacementPosition;
             currentDisplacementPosition = expectedDisplacementPosition;
         }
@@ -113,25 +129,37 @@ public class CardUI : MonoBehaviour
             return;
         }
 
+        if (Input.GetKeyUp(KeyCode.Escape))
+            isOpen = false;
+
         if (isOpen && selectedItems.GetOpenGUID() != id)
             isOpen = false;
 
         if (isMoving)
             isOpen = false;
 
-        if (detailsObject.activeSelf != isOpen)
-            detailsObject.SetActive(isOpen);
+        RecalculateIsVisible();
 
+        if(CanJoin())
+        {
+            CardInPlay charWithInflunce = GetMergeCandidate();
+            if (charWithInflunce != null)
+                AskToJoinCompanies(card, charWithInflunce);
+        }
+
+        RefreshAtHex();
+    }
+
+    public void RecalculateIsVisible()
+    {
         if (game.GetHumanPlayer().SeesTile(card.hex) != isVisible)
             isVisible = game.GetHumanPlayer().SeesTile(card.hex);
 
         isVisible = cardPositionAtHex > 0 ? false : isVisible;
+        isVisible = card.GetCompanyLeader() != null ? false : isVisible;
 
         if (isVisible)
         {
-            short movementLeft = (short)(MovementConstants.characterMovement - card.moved);
-            movement.text = Sprites.movement + movementLeft.ToString();
-
             nextCanvasGroup.alpha = totalCardsAtHex > 1 ? 1 : 0;
             nextCanvasGroup.interactable = totalCardsAtHex > 1 ? true : false;
             nextCanvasGroup.blocksRaycasts = totalCardsAtHex > 1 ? true : false;
@@ -139,10 +167,83 @@ public class CardUI : MonoBehaviour
         canvasGroup.alpha = isVisible ? 1 : 0;
         canvasGroup.interactable = isVisible;
         canvasGroup.blocksRaycasts = isVisible;
-
-        RefreshAtHex();
     }
 
+    public bool CanJoin()
+    {
+        return
+            selectedItems.IsCharSelected() &&
+            selectedItems.GetSelectedCardUI() == this &&
+            !GetCard().IsAvatar() &&
+            totalCardsAtHex > 0 &&
+            !popupManager.IsShown() &&
+            isOpen &&
+            isVisible &&
+            !GetCard().IsInCompany();
+    }
+
+    public CardInPlay GetMergeCandidate()
+    {
+        return allCards.DefaultIfEmpty(null).FirstOrDefault(
+            x => x.IsCharacter() && 
+            x.GetCharacterDetails().influence >= card.GetCharacterDetails().mind &&
+            x != card && 
+            !rejectedMerges.Contains(x));
+    }
+
+    public void AskToJoinCompanies(CardInPlay selected, CardInPlay leader)
+    {
+
+        potentialLeader = leader;
+        okOption option1 = new()
+        {
+            text = "Yes",
+            cardBoolFunc = Merge
+        };
+        cancelOption cancel = new()
+        {
+            text = "No",
+            cardBoolFunc = Cancel
+        };
+        List<okOption> options = new() { option1 };
+
+        popupManager.Initialize("Do you want " + selected.name + " to join the company of " + leader.name, options, cancel);
+        button.enabled = false;
+    }
+
+    public void Merge()
+    {
+        popupManager.HidePopup();
+        card.SetCompanyLeader(potentialLeader.GetDetails().cardName);
+        button.enabled = true;
+        potentialLeader.GetCardUI().SetFirstAtHex();
+    }
+
+    public void Cancel()
+    {
+        popupManager.HidePopup();
+        button.enabled = true;
+        rejectedMerges.Add(potentialLeader);
+    }
+
+    public Sprite GetSprite()
+    {
+        switch (Nations.alignments[card.owner])
+        {
+            case AlignmentsEnum.DARK_SERVANTS:
+                return darkSprite;
+            case AlignmentsEnum.FREE_PEOPLE:
+                return freeSprite;
+            case AlignmentsEnum.NEUTRAL:
+                return neutralSprite;
+            case AlignmentsEnum.CHAOTIC:
+                return chaosSprite;
+            case AlignmentsEnum.RENEGADE:
+                return renegadeSprite;
+            default:
+                return null;
+        }
+    }
     public void Toggle()
     {
         if(game.GetHumanPlayer().GetNation() != card.owner)
@@ -159,7 +260,7 @@ public class CardUI : MonoBehaviour
             {
                 Debug.Log("Selected " + card.GetDetails().cardName + " (character) at *" + card.hex.x + "," + card.hex.y + "*");
                 selectedItems.SelectCardUI(this);
-            }                
+            }
             else
                 selectedItems.UnselectCardDetails();
         }            
@@ -189,6 +290,15 @@ public class CardUI : MonoBehaviour
     public void Next()
     {
         int newPosition = allCards.Count - 1;
+        selectedItems.SelectCardDetails(allCards[newPosition].GetCardUI(), allCards[newPosition].GetDetails(), false);
+        allCards.Remove(card);
+        allCards.Insert(newPosition, card);
+    }
+
+    public void SetFirstAtHex()
+    {
+        int newPosition = 0;
+        selectedItems.SelectCardDetails(card.GetDetails(), false);
         allCards.Remove(card);
         allCards.Insert(newPosition, card);
     }

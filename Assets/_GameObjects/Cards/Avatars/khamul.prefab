@@ -52,8 +52,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49007e364c576de448b69e25d8d71fb3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardSprite: {fileID: -9123289345285641849, guid: 0c8a1cbadf8544249a1efb96fe9b2c87,
-    type: 3}
+  cardSprite: {fileID: -9123289345285641849, guid: 0c8a1cbadf8544249a1efb96fe9b2c87, type: 3}
   cardId: khamul_the_ringwraith
   groupId: khamul
   cardName: Khamul The Ringwraith
@@ -61,6 +60,7 @@ MonoBehaviour:
   alignment: 1
   isUnique: 1
   victoryPoints: 0
+  victoryPointsModifierIfEliminated: 0
   corruption: 0
 --- !u!222 &9002241949614178889
 CanvasRenderer:
@@ -101,10 +101,13 @@ MonoBehaviour:
   subRace: 0
   classes: 000000000300000004000000
   abilities: 070000000d0000000e000000
-  homeTown: dol_guldur
+  homeTown:
+  - dol_guldur
   isAgent: 0
   isWinged: 0
   isLeader: 0
+  isElvenLord: 0
+  isDwarfLord: 0
   isInmovable: 0
   globalInfluenceModifier: 0
   prowess: 9

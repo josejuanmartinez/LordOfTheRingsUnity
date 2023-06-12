@@ -103,7 +103,7 @@ public static class HexTranslator
     {
         List<Vector3Int> result = new List<Vector3Int>() { cell };
         bool even = (cell.y % 2 == 0);
-        Vector3Int[] directions = even ? MoveOnTilemap.directionsEvenY : MoveOnTilemap.directionsUnevenY;
+        Vector3Int[] directions = even ? MovementManager.directionsEvenY : MovementManager.directionsUnevenY;
         foreach(Vector3Int direction in directions)
         {
             Vector3Int res = cell + direction;

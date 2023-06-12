@@ -51,16 +51,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49007e364c576de448b69e25d8d71fb3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardSprite: {fileID: -8115979358218922709, guid: a1af5a60c6e27eb4591dca64995465fe,
-    type: 3}
-  cardIcon: {fileID: 21300000, guid: b7448abeefd5543499b1a0bd70f37484, type: 3}
+  cardSprite: {fileID: -8115979358218922709, guid: a1af5a60c6e27eb4591dca64995465fe, type: 3}
   cardId: olog_warlords
-  groupId: 
+  groupId: olog_warlords
   cardName: Olog Warlords
   cardClass: 10
   alignment: 1
   isUnique: 0
   victoryPoints: 1
+  victoryPointsModifierIfEliminated: 0
   corruption: 0
 --- !u!222 &2885910867636438324
 CanvasRenderer:

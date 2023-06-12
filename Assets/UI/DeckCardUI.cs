@@ -52,12 +52,10 @@ public class DeckCardUI : MonoBehaviour
         switch(cardDetails.cardClass)
         {
             case CardClass.HazardCreature:
-                HazardCreatureCardDetails hazard = GetComponent<HazardCreatureCardDetails>();
-                button.interactable = pool.HasEnoughMana(hazard.cardTypes);
+                button.interactable = deck.IsHazardCreaturePlayable(cardDetails, owner);
                 break;
             case CardClass.Character:
-                CharacterCardDetails character = GetComponent<CharacterCardDetails>();
-                button.interactable = deck.IsCharacterCardPlayable(character, owner);
+                button.interactable = deck.IsCharacterCardPlayable(cardDetails, owner);
                 break;
         }
     }

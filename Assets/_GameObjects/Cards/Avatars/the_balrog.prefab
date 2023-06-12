@@ -51,8 +51,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49007e364c576de448b69e25d8d71fb3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardSprite: {fileID: -7137313368215510333, guid: 28a2dfb358d08ab4abc3e4eefc114ba4,
-    type: 3}
+  cardSprite: {fileID: -7137313368215510333, guid: 28a2dfb358d08ab4abc3e4eefc114ba4, type: 3}
   cardId: the_balrog
   groupId: the_balrog
   cardName: The Balrog
@@ -79,7 +78,8 @@ MonoBehaviour:
   subRace: 0
   classes: 0000000003000000
   abilities: 390000003a000000
-  homeTown: moria
+  homeTown:
+  - moria
   isAgent: 0
   isWinged: 0
   isLeader: 0

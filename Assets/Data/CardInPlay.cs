@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -20,12 +21,16 @@ public class CardInPlay : MonoBehaviour
     private ResourcesManager resourcesManager;
     private PlaceDeck placeDeck;
 
+    private CardUI cardUI;
+    private string inCompanyOf;
+
     void Awake()
     {
         cardDetailsRepo = GameObject.Find("CardDetailsRepo").GetComponent<CardDetailsRepo>();
         board = GameObject.Find("Board").GetComponent<Board>();
         resourcesManager = GameObject.Find("ResourcesManager").GetComponent<ResourcesManager>();
         placeDeck = GameObject.Find("PlaceDeck").GetComponent<PlaceDeck>();
+        cardUI = GetComponent<CardUI>();
     }
 
     void Initialize()
@@ -129,5 +134,37 @@ public class CardInPlay : MonoBehaviour
     public void AddMovement(short movement)
     {
         moved += movement;
+    }
+
+    public string GetCompanyLeader()
+    {
+        return inCompanyOf;
+    }
+    
+    public void SetCompanyLeader(string companyLeader)
+    {
+        inCompanyOf = companyLeader;
+    }
+
+    public void RemoveCompanyLeader()
+    {
+        inCompanyOf = null;
+    }
+
+    public bool IsInCompany()
+    {
+        return inCompanyOf != null;
+    }
+
+    public CardUI GetCardUI()
+    {
+        return cardUI;
+    }
+
+    public void SetHex(Vector2Int hex)
+    {
+        this.hex = hex;
+        List<CardInPlay> company = board.GetCharacterManager().GetCharactersInCompanyOf(details);
+        company.ForEach(x => x.hex = hex);
     }
 }

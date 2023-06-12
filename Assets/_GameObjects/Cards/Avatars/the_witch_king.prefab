@@ -52,8 +52,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49007e364c576de448b69e25d8d71fb3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardSprite: {fileID: -7090223651097368951, guid: 50f94ae67c575664092be0f12119584e,
-    type: 3}
+  cardSprite: {fileID: -7090223651097368951, guid: 50f94ae67c575664092be0f12119584e, type: 3}
   cardId: the_witch_king
   groupId: the_witch_king
   cardName: The Witch-King
@@ -61,6 +60,7 @@ MonoBehaviour:
   alignment: 1
   isUnique: 1
   victoryPoints: 0
+  victoryPointsModifierIfEliminated: 0
   corruption: 0
 --- !u!222 &9002241949614178889
 CanvasRenderer:
@@ -101,7 +101,8 @@ MonoBehaviour:
   subRace: 0
   classes: 000000000200000004000000
   abilities: 0a0000003200000033000000
-  homeTown: imlad_morgul
+  homeTown:
+  - region_imlad_morgul
   isAgent: 0
   isWinged: 0
   isLeader: 0

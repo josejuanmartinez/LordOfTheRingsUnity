@@ -64,5 +64,15 @@ public enum CharacterAbilitiesEnum
     MinusThreeToInfluenceAngurth,
     MinusThreeToInfluenceItangast,
     MinusThreeToInfluenceScatha,
-    NonStoredTreasuresWorthAllMarshallingPoints
+    NonStoredTreasuresWorthAllMarshallingPoints,
+    PlusTwoToInfluenceOrcs,
+    ChoosesDefendingCharacters,
+    DiscardItemInsteadOfWound,
+    MayTapToAttackWithPlusTwoToProwess,
+    PlusTwoToInfluenceTrolls,
+    PlusOneAgainstElves,
+    PlusOneAgainstDwarves,
+    FreeToControlIfLeaderHasWhip,
+    PlusOneToUnderdeepsMovement,
+    PlusOneToFactionsInDolGuldur,
 }

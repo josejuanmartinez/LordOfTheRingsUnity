@@ -56,4 +56,9 @@ public class PopupManager : MonoBehaviour
     {
         popup.gameObject.SetActive(false);
     }
+
+    public bool IsShown()
+    {
+        return popup.gameObject.activeSelf;
+    }
 }

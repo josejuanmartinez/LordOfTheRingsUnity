@@ -51,8 +51,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49007e364c576de448b69e25d8d71fb3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardSprite: {fileID: 7359309175163535366, guid: 5d3a873d9bfc3e747ae566a1652bbb81,
-    type: 3}
+  cardSprite: {fileID: 7359309175163535366, guid: 5d3a873d9bfc3e747ae566a1652bbb81, type: 3}
   cardId: saruman_of_many_colours
   groupId: saruman
   cardName: Saruman of Many Colours
@@ -60,6 +59,7 @@ MonoBehaviour:
   alignment: 2
   isUnique: 1
   victoryPoints: 0
+  victoryPointsModifierIfEliminated: 0
   corruption: 0
 --- !u!114 &2156722876768731498
 MonoBehaviour:
@@ -78,7 +78,8 @@ MonoBehaviour:
   subRace: 0
   classes: 01000000040000000200000003000000
   abilities: 11000000120000001300000031000000
-  homeTown: isengard
+  homeTown:
+  - isengard
   isAgent: 0
   isWinged: 0
   isLeader: 0

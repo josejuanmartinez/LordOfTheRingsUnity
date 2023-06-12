@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Resources;
 using UnityEngine;
 using UnityEngine.Events;
@@ -28,6 +29,9 @@ public class PlaceDeck : MonoBehaviour
     private ResourcesManager resourcesManager;
     private Turn turn;
     private Board board;
+    private Game game;
+    private MovementManager movementManager;
+    private DeckManager deckManager;
 
     // Start is called before the first frame update
     void Awake()
@@ -40,6 +44,9 @@ public class PlaceDeck : MonoBehaviour
         resourcesManager = GameObject.Find("ResourcesManager").GetComponent<ResourcesManager>();
         turn = GameObject.Find("Turn").GetComponent<Turn>();
         board = GameObject.Find("Board").GetComponent<Board>();
+        game = GameObject.Find("Game").GetComponent<Game>();
+        movementManager = GameObject.Find("MovementManager").GetComponent<MovementManager>();
+        deckManager = GameObject.Find("Deck").GetComponent<DeckManager>();
     }
 
     // Update is called once per frame
@@ -47,8 +54,37 @@ public class PlaceDeck : MonoBehaviour
     {
         if (selectedItems.GetSelectedCityDetails() != null)
         {
-            if (placeImage.sprite != selectedItems.GetSelectedCityDetails().darkSprite)
-                placeImage.sprite = selectedItems.GetSelectedCityDetails().darkSprite;
+            if (placeImage.sprite != selectedItems.GetSelectedCityDetails().darkSprite && 
+                placeImage.sprite != selectedItems.GetSelectedCityDetails().freeSprite &&
+                placeImage.sprite != selectedItems.GetSelectedCityDetails().renegadeSprite &&
+                placeImage.sprite != selectedItems.GetSelectedCityDetails().balrogSprite &&
+                placeImage.sprite != selectedItems.GetSelectedCityDetails().lordSprite)
+            {
+                switch(Nations.alignments[game.GetHumanPlayer().GetNation()])
+                {
+                    case AlignmentsEnum.DARK_SERVANTS:
+                        placeImage.sprite = selectedItems.GetSelectedCityDetails().darkSprite;
+                        break;
+                    case AlignmentsEnum.FREE_PEOPLE:
+                    case AlignmentsEnum.NEUTRAL:
+                        placeImage.sprite = selectedItems.GetSelectedCityDetails().freeSprite;
+                        break;
+                    case AlignmentsEnum.RENEGADE:
+                        if (selectedItems.GetSelectedCityDetails().renegadeSprite != null)
+                            placeImage.sprite = selectedItems.GetSelectedCityDetails().renegadeSprite;
+                        else
+                            placeImage.sprite = selectedItems.GetSelectedCityDetails().darkSprite;
+                        break;
+                    case AlignmentsEnum.CHAOTIC:
+                        if (selectedItems.GetSelectedCityDetails().balrogSprite!= null)
+                            placeImage.sprite = selectedItems.GetSelectedCityDetails().balrogSprite;
+                        else
+                            placeImage.sprite = selectedItems.GetSelectedCityDetails().darkSprite;
+                        break;
+                }
+                
+            }
+                
             place.SetActive(true);
         }
         else if (selectedItems.GetSelectedCardDetails() != null)
@@ -72,16 +108,6 @@ public class PlaceDeck : MonoBehaviour
         //    button.gameObject.SetActive(selectedItems.IsDeckCardSelected());
     }
 
-    public void RemoveHoverCard(CityDetails card)
-    {
-        if (hoverCard == card.darkSprite)
-        {
-            hoverCard = null;
-            place.SetActive(false);
-        }
-
-    }
-
     public void RemoveHoverCard(CardDetails details)
     {
         if (hoverCard == details.cardSprite)
@@ -98,39 +124,46 @@ public class PlaceDeck : MonoBehaviour
     }
     public void SetHoverCity(CityDetails details)
     {
-        switch(Nations.alignments[turn.GetCurrentPlayer()])
+        switch (Nations.alignments[game.GetHumanPlayer().GetNation()])
         {
+            case AlignmentsEnum.DARK_SERVANTS:
+                hoverCard = details.darkSprite;
+                break;
             case AlignmentsEnum.FREE_PEOPLE:
             case AlignmentsEnum.NEUTRAL:
                 hoverCard = details.freeSprite;
                 break;
-            case AlignmentsEnum.DARK_SERVANTS:
             case AlignmentsEnum.RENEGADE:
-                hoverCard = details.darkSprite;
+                if (selectedItems.GetSelectedCityDetails().renegadeSprite != null)
+                    hoverCard = details.renegadeSprite;
+                else
+                    hoverCard = details.darkSprite;
                 break;
-        }
+            case AlignmentsEnum.CHAOTIC:
+                if (selectedItems.GetSelectedCityDetails().balrogSprite != null)
+                    hoverCard = details.balrogSprite;
+                else
+                    hoverCard = details.darkSprite;
+                break;
+        }    
     }
 
     public void RemoveHoverCard(CardInPlay card)
     {
-        if (hoverCard == card.GetDetails().cardSprite)
-        {
-            hoverCard = null;
-            place.SetActive(false);
-        }
+        RemoveHoverCard(card.GetDetails());
     }
     public void RemoveHoverCity(CityInPlay city)
     {
-        if (hoverCard == city.GetDetails().darkSprite)
-        {
-            hoverCard = null;
-            place.SetActive(false);
-        }
+        RemoveHoverCity(city.GetDetails());
     }
 
     public void RemoveHoverCity(CityDetails cityDetails)
     {
-        if (hoverCard == cityDetails.darkSprite)
+        if (hoverCard == cityDetails.darkSprite ||
+                hoverCard == cityDetails.freeSprite ||
+                hoverCard == cityDetails.renegadeSprite ||
+                hoverCard == cityDetails.balrogSprite ||
+                hoverCard == cityDetails.lordSprite)
         {
             hoverCard = null;
             place.SetActive(false);
@@ -140,11 +173,6 @@ public class PlaceDeck : MonoBehaviour
     public void SetHoverCard(CardInPlay card)
     {
         hoverCard = card.GetDetails().cardSprite;
-    }
-
-    public void SetHoverCard(CityInPlay city)
-    {
-        hoverCard = city.GetDetails().darkSprite;
     }
 
     public string GetOpenGUID()
@@ -242,6 +270,9 @@ public class PlaceDeck : MonoBehaviour
 
     public void PlayCharacter()
     {
+        if (selectedItems.GetSelectedCardDetails() == null)
+            return;
+
         okOption option1 = new()
         {
             text = "At Haven",
@@ -257,13 +288,26 @@ public class PlaceDeck : MonoBehaviour
             text = "Cancel",
             cardBoolFunc = Cancel
         };
-        List<okOption> options = new() { option1, option2 };
+        List<okOption> options = new() { };
+
+        CardDetails cc = selectedItems.GetSelectedCardDetails();
+        if(cc != null)
+        {
+            if (deckManager.CanSpawnAtHomeTown(cc, turn.GetCurrentPlayer()))
+                options.Add(option2);
+
+            if (deckManager.CanSpawnAtHaven(turn.GetCurrentPlayer()))
+                options.Add(option1);
+        }        
 
         popupManager.Initialize("Where do you want to recruit your character?", options, cancel);
         button.enabled = false;
     }
     public void PlayHazardCreature()
     {
+        if (selectedItems.GetSelectedCardDetails() == null)
+            return;
+
         okOption option1 = new()
         {
             text = "At the last visited cell",
@@ -279,7 +323,16 @@ public class PlaceDeck : MonoBehaviour
             text = "Cancel",
             cardBoolFunc = Cancel
         };
-        List<okOption> options = new() { option1, option2 };
+        List<okOption> options = new() {  };
+
+        CardDetails cc = selectedItems.GetSelectedCardDetails();
+        if (cc != null)
+        {
+            if (deckManager.CanSpawnAtHaven(turn.GetCurrentPlayer()))
+                options.Add(option2);
+            if (deckManager.CanSpawnAtLastHex())
+                options.Add(option1);
+        }
 
         popupManager.Initialize("Where do you want to spawn a hazard creature?", options, cancel);
         button.enabled = false;

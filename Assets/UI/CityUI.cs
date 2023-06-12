@@ -122,6 +122,9 @@ public class CityUI : MonoBehaviour
         if (!isInitialized)
             return;
 
+        if (Input.GetKeyUp(KeyCode.Escape))
+            isOpen = false;
+
         if (isOpen && selectedItems.GetOpenGUID() != id)
             isOpen = false;
 

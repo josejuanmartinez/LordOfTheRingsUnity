@@ -78,7 +78,8 @@ MonoBehaviour:
   subRace: 4
   classes: 000000000200000004000000
   abilities: 3b0000003c0000003e0000003d0000003f00000040000000
-  homeTown: the_lonely_mountain
+  homeTown:
+  - the_lonely_mountain
   isAgent: 0
   isWinged: 1
   isLeader: 0

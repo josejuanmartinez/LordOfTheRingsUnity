@@ -2,8 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 public class CardManager
-{
-    
+{    
     Board board;
     public CardManager(Board board)
     {

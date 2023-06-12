@@ -41,7 +41,7 @@ public class CityInPlay : MonoBehaviour
 
             resourcesManager.Initialize(owner, details.GetCityProduction());
 
-            Debug.Log(details.name + " registered itself in Board at " + HexTranslator.GetDebugTileInfo(hex) + " " + HexTranslator.GetNormalizedCellPosString(hex));
+            //Debug.Log(details.name + " registered itself in Board at " + HexTranslator.GetDebugTileInfo(hex) + " " + HexTranslator.GetNormalizedCellPosString(hex));
         }
     }
 

@@ -9,7 +9,7 @@ public class CharacterCardDetails : MonoBehaviour
     public SubRacesEnum subRace = SubRacesEnum.None;
     public List<CharacterClassEnum> classes;
     public List<CharacterAbilitiesEnum> abilities;
-    public string homeTown;
+    public List<string> homeTown;
     public bool isAgent;
     public bool isWinged;
     public bool isLeader;
