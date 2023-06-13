@@ -17,6 +17,8 @@ public class CityInPlay : MonoBehaviour
     private CardDetailsRepo cardDetailsRepo;
     private ResourcesManager resourcesManager;
     private PlaceDeck placeDeck;
+    private CityUI cityUI;
+    private Game game;
 
     void Awake()
     {
@@ -24,6 +26,8 @@ public class CityInPlay : MonoBehaviour
         board = GameObject.Find("Board").GetComponent<Board>();
         resourcesManager = GameObject.Find("ResourcesManager").GetComponent<ResourcesManager>();
         placeDeck = GameObject.Find("PlaceDeck").GetComponent<PlaceDeck>();
+        cityUI = GetComponent<CityUI>();
+        game = GameObject.Find("Game").GetComponent<Game>();
     }
     void Initialize()
     {
@@ -80,5 +84,12 @@ public class CityInPlay : MonoBehaviour
     public bool IsInitialized()
     {
         return initialized;
+    }
+
+    public void Tap(NationsEnum nation)
+    {
+        details.Tap(nation);
+        if(nation == game.GetHumanPlayer().GetNation())
+            cityUI.Tap();
     }
 }

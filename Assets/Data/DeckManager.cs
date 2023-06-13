@@ -10,12 +10,6 @@ public class DeckManager : MonoBehaviour
 
     public short lastCardDrawn = -1;
         
-    public short handSize = 6;
-    public GameObject[] handCards;
-    
-
-    public short cardsInHand = 0;
-
     public short cardShown = -1;
 
     public bool isInitialized = false;
@@ -30,8 +24,9 @@ public class DeckManager : MonoBehaviour
     private Turn turn;
     private ResourcesManager resourcesManager;
     private MovementManager movementManager;
-    private CardDetailsRepo cardRepo;
+    private CardDetailsRepo cardRepo;  
     private Game game;
+
     void Awake()
     {
         pool = GameObject.Find("ManaPool").GetComponent<ManaPool>();
@@ -64,7 +59,41 @@ public class DeckManager : MonoBehaviour
             return;
         }
         if(cardShown != -1)
-            placeDeck.SetHoverCard(handCards[cardShown].transform.GetChild(0).GetComponent<CardDetails>());
+            placeDeck.SetHoverCard(GetHandCard(cardShown).GetComponent<CardDetails>());
+    }
+
+    public int GetHandSize()
+    {
+        List<CardInPlay> charsWithExtraAtHome = board.GetCharacterManager().GetCharactersOfPlayer(turn.GetCurrentPlayer()).FindAll(x => x.GetCharacterDetails().abilities.Contains(CharacterAbilitiesEnum.OneAdditionalCardAtHome)).ToList();
+        int counter = 0;
+        foreach(CardInPlay c in charsWithExtraAtHome)
+        {
+            if(c.GetCharacterDetails() != null)
+            {
+                CharacterCardDetails cardDetails = c.GetCharacterDetails();
+                foreach(string ht in cardDetails.homeTown)
+                {
+                    CityInPlay city = board.GetCityManager().GetCityOfPlayer(c.owner, ht);
+                    if(city != null)
+                    {
+                        if (city.hex == c.hex)
+                        {
+                            counter++;
+                        }
+                    }
+                }
+            }
+            
+        }
+        return CardsConstants.minHand + counter;
+    }
+
+    private GameObject GetHandCard(int cardShown)
+    {
+        if (hand.transform.childCount <= cardShown || cardShown < 0)
+            return null;
+
+        return hand.transform.GetChild(hand.transform.childCount - 1 - cardShown).gameObject;
     }
 
     private void Shuffle()
@@ -80,38 +109,21 @@ public class DeckManager : MonoBehaviour
 
     public void DrawHand()
     {
-        for(int i= 0; i < handSize; i++)
+        for(int i= 0; i < GetHandSize(); i++)
             Draw();
     }
 
     public void Draw()
     {
-        if (cardsInHand == handSize)
-        {
-            Debug.LogError("THe player is trying to draw more cards than available in hand!");
-            return;
-        }
-
-        for (int i = handSize-1; i > 0; i--)
-        {
-            if (handCards[i-1].transform.childCount > 0)
-            {
-                GameObject cardToMove = handCards[i - 1].transform.GetChild(0).gameObject;
-                cardToMove.GetComponent<DeckCardUI>().increaseHandPosition();
-                cardToMove.transform.SetParent(handCards[i].transform, false);
-            }   
-        }
-
-        if (handCards[0].transform.childCount > 0)
-            Destroy(handCards[0].transform.GetChild(0).gameObject);
+        for (int i = GetHandSize() - 1; i > 0; i--)
+            if (GetHandCard(i - 1) != null)
+                GetHandCard(i - 1).GetComponent<DeckCardUI>().increaseHandPosition();
 
         // This is the counter of cards drawn from the Deck (all cards)
         lastCardDrawn++;
 
-        CreateCard(cardsObjects[lastCardDrawn], handCards[0].transform);
+        CreateCard(cardsObjects[lastCardDrawn], hand.transform);
         
-        //This is the counter of cards I have in my hand
-        cardsInHand++;
     }
 
     public void CreateCard(GameObject card, Transform parentTransform)
@@ -134,41 +146,41 @@ public class DeckManager : MonoBehaviour
     public void DiscardAndDraw(CardDetails card)
     {
         int index = -1;
-        for(int i = 0; i < handCards.Length; i++)
+        short handPos = -1;
+        for(int i = 0; i < GetHandSize(); i++)
         {
-            if (handCards[i].transform.childCount > 0)
+            if (GetHandCard(i) == null)
+                continue;
+            string cardId = GetHandCard(i).GetComponent<CardDetails>().cardId;
+            if (cardId == card.cardId)
             {
-                string cardId = handCards[i].transform.GetChild(0).gameObject.GetComponent<CardDetails>().cardId;
-                if (cardId == card.cardId)
-                {
-                    index = i;
-                    break;
-                }                    
-            }
+                index = i;
+                handPos = GetHandCard(i).GetComponent<DeckCardUI>().handPos;
+                break;
+            }                    
         }
-        if(index == -1)
+        if(index == -1 || handPos == -1)
         {
-            Debug.Log("Unable to discard card " + card.cardId);
+            Debug.LogError("Unable to discard card " + card.cardId);
+            Hide(cardShown);
             return;
         }
-        if (handCards[index].transform.childCount > 0)
-            Destroy(handCards[index].transform.GetChild(0).gameObject);
+        
+        // Destroy the card from hand
+        Destroy(GetHandCard(index).gameObject);
 
+        // Add it to discard pile
         discardPile.Add(card);
 
-        for (int i = index - 1; i > 0; i--)
-        {
-            if (handCards[i - 1].transform.childCount > 0)
-            {
-                GameObject cardToMove = handCards[i - 1].transform.GetChild(0).gameObject;
-                cardToMove.GetComponent<DeckCardUI>().increaseHandPosition();
-                cardToMove.transform.SetParent(handCards[i].transform, false);
-            }
-        }
+        //For all the cards before, I increase the counter
+        for (int i = handPos - 1; i >= 0; i--)
+            GetHandCard(i).GetComponent<DeckCardUI>().increaseHandPosition();
+        
         // This is the counter of cards drawn from the Deck (all cards)
         lastCardDrawn++;
 
-        CreateCard(cardsObjects[lastCardDrawn], handCards[0].transform);
+        CreateCard(cardsObjects[lastCardDrawn], hand.transform);
+        Hide(cardShown);
     }
 
     public void Show(short card)
@@ -178,9 +190,15 @@ public class DeckManager : MonoBehaviour
 
     public void Hide(short card)
     {
+        if (card == -1)
+        {
+            cardShown = -1;
+            return;
+        }
+         
         if (cardShown == card)
         {
-            placeDeck.RemoveHoverCard(handCards[cardShown].transform.GetChild(0).GetComponent<CardDetails>());
+            placeDeck.RemoveHoverCard(GetHandCard(cardShown).GetComponent<CardDetails>());
             cardShown = -1;
         }
             
@@ -201,7 +219,7 @@ public class DeckManager : MonoBehaviour
         if (character == null)
             return false;
         
-        if (resourcesManager.GetFreeInfluence(turn.GetCurrentPlayer()) < character.mind)
+        if (resourcesManager.GetFreeInfluence(turn.GetCurrentPlayer(), false) < character.mind)
             return false;
 
         if (cardDetails.IsInPlay())
@@ -213,6 +231,67 @@ public class DeckManager : MonoBehaviour
         if (CanSpawnAtHaven(owner))
             return true;
         
+        return false;
+    }
+    public bool IsGoldRingCardPlayable(CardDetails cardDetails, NationsEnum owner)
+    {
+        return false;
+    }
+
+    public bool IsUndiscoveredRingCardPlayable(ObjectCardDetails cardDetails, NationsEnum owner)
+    {
+        return false;
+    }
+
+    public bool IsObjectCardPlayable(CardDetails cardDetails, NationsEnum owner)
+    {
+        ObjectCardDetails details = cardDetails.GetObjectCardDetails();
+        if (details == null)
+            return false;
+        
+        if (details.IsUndiscoveredRing())
+            return IsUndiscoveredRingCardPlayable(details, owner);
+
+        List<CityInPlay> cities = board.GetCityManager().GetCitiesWithCharactersOfPlayer(owner);
+        foreach(CityInPlay city in cities)
+        {
+            CityDetails cityDetails = city.GetDetails();
+            if(cityDetails != null)
+            {
+                if (cityDetails.IsTapped(owner))
+                    continue;
+                AlignmentsEnum alignment = Nations.alignments[owner];
+                switch(alignment)
+                {
+                    case AlignmentsEnum.DARK_SERVANTS:
+                    case AlignmentsEnum.CHAOTIC:
+                        foreach(ObjectTypes obj in cityDetails.objectTypesDark)
+                            if (obj == details.itemType) 
+                                return true;
+                        break;
+                    case AlignmentsEnum.FREE_PEOPLE:
+                    case AlignmentsEnum.NEUTRAL:
+                        foreach (ObjectTypes obj in cityDetails.objectTypesFree)
+                            if (obj == details.itemType)
+                                return true;
+                        break;
+                    case AlignmentsEnum.RENEGADE:
+                        if(cityDetails.objectTypesRenegade.Count() > 0 || cityDetails.renegadeSprite != null)
+                        {
+                            foreach (ObjectTypes obj in cityDetails.objectTypesRenegade)
+                                if (obj == details.itemType)
+                                    return true;
+                        } 
+                        else
+                        {
+                            foreach (ObjectTypes obj in cityDetails.objectTypesFree)
+                                if (obj == details.itemType)
+                                    return true;
+                        }
+                        break;
+                }
+            }
+        }
         return false;
     }
 

@@ -6,7 +6,8 @@ using UnityEngine;
 public enum DiceRollEnum
 {
     CharacterRoll,
-    HazardCreatureRoll
+    HazardCreatureRoll,
+    ObjectRoll
 }
 
 public class DiceManager : MonoBehaviour

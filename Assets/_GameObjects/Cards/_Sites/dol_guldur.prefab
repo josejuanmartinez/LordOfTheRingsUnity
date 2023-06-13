@@ -68,18 +68,25 @@ MonoBehaviour:
   - rhosgobel
   terrain: 12
   cardType: 3
+  faction: 010000000b000000
   objectTypesFree: 000000000100000003000000
   objectTypesDark: 
   objectTypesRenegade: 
   automaticAttacksFree: 1e0000001f000000
   automaticAttacksDark: 
   automaticAttacksRenegade: 
+  isHidden: 0
+  hasPort: 0
+  hasHoard: 0
+  isUnderground: 0
   iDrawFree: 2
   youDrawFree: 4
   iDrawDark: 2
   youDrawDark: 2
   iDrawRenegade: 0
   youDrawRenegade: 0
+  corruption: 0
+  citySpecials: 
   cityId: dol_guldur
   regionId: southern_mirkwood
   cityName: Dol Guldur
@@ -87,3 +94,5 @@ MonoBehaviour:
   freeSprite: {fileID: 21300000, guid: 6be1c13a9d88d914ba3141040ef6f100, type: 3}
   darkSprite: {fileID: 21300000, guid: ceefb7884219a1e46bc80c7feaee6380, type: 3}
   renegadeSprite: {fileID: 0}
+  balrogSprite: {fileID: 0}
+  lordSprite: {fileID: 0}

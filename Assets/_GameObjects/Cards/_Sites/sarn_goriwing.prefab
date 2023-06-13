@@ -67,18 +67,25 @@ MonoBehaviour:
   - rhosgobel
   terrain: 7
   cardType: 3
+  faction: 08000000
   objectTypesFree: 0000000001000000
   objectTypesDark: 0000000001000000
   objectTypesRenegade: 
   automaticAttacksFree: 20000000
   automaticAttacksDark: 20000000
   automaticAttacksRenegade: 
+  isHidden: 0
+  hasPort: 0
+  hasHoard: 0
+  isUnderground: 0
   iDrawFree: 2
   youDrawFree: 2
   iDrawDark: 1
   youDrawDark: 1
   iDrawRenegade: 0
   youDrawRenegade: 0
+  corruption: 0
+  citySpecials: 
   cityId: sarn_goriwing
   regionId: heart_of_mirkwood
   cityName: Sarn Goriwing
@@ -86,3 +93,5 @@ MonoBehaviour:
   freeSprite: {fileID: 21300000, guid: 3c6379b44de179a4b8bb602111925b0c, type: 3}
   darkSprite: {fileID: 21300000, guid: e19464779b0f595468e1c022cc4c38fe, type: 3}
   renegadeSprite: {fileID: 0}
+  balrogSprite: {fileID: 0}
+  lordSprite: {fileID: 0}

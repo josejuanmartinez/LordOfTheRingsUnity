@@ -67,6 +67,7 @@ MonoBehaviour:
   - goblin_gate
   terrain: 6
   cardType: 4
+  faction: 03000000
   objectTypesFree: 000000000100000004000000
   objectTypesDark: 000000000100000004000000
   objectTypesRenegade: 

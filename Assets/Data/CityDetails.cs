@@ -32,8 +32,11 @@ public class CityDetails: MonoBehaviour
     public List<string> nearestHavenFree;
     public List<string> nearestHavenDark;
     public List<string> nearestHavenRenegade;
+    
     public TerrainsEnum terrain;
     public CardTypesEnum cardType;
+    public List<FactionsEnum> faction;
+
     public List<ObjectTypes> objectTypesFree;
     public List<ObjectTypes> objectTypesDark;
     public List<ObjectTypes> objectTypesRenegade;
@@ -67,6 +70,8 @@ public class CityDetails: MonoBehaviour
     public Sprite balrogSprite;
     public Sprite lordSprite;
 
+    private HashSet<NationsEnum> tappers = new HashSet<NationsEnum>();
+        
     public void Initialize()
     {
         production = CityDataGenerator.Generate(terrain, size);
@@ -80,6 +85,15 @@ public class CityDetails: MonoBehaviour
     public bool IsHaven()
     {
         return isHaven;
+    }
+    public void Tap(NationsEnum nation)
+    {
+        tappers.Add(nation);
+    }
+
+    public bool IsTapped(NationsEnum nationEnum)
+    {
+        return tappers.Contains(nationEnum);
     }
 }
 

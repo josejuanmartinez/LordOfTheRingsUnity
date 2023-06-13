@@ -32,6 +32,29 @@ public class CardInPlay : MonoBehaviour
         placeDeck = GameObject.Find("PlaceDeck").GetComponent<PlaceDeck>();
         cardUI = GetComponent<CardUI>();
     }
+    public void Initialize(Vector2Int hex)
+    {
+        if (board.IsInitialized() && cardDetailsRepo.IsInitialized() && !string.IsNullOrEmpty(cardId))
+        {
+            this.hex = hex;
+            board.AddCard(hex, this);
+
+            GameObject cardObject = Instantiate(cardDetailsRepo.GetCardDetails(cardId));
+            cardObject.name = cardId + "_details";
+            cardObject.transform.SetParent(transform);
+            details = cardObject.GetComponent<CardDetails>();
+            details.Play();
+
+            board = GameObject.Find("Board").GetComponent<Board>();
+
+            initialized = true;
+
+            if (IsCharacter())
+                resourcesManager.RecalculateInfluence(owner);
+
+            Debug.Log(details.cardName + " registered itself in Board at " + HexTranslator.GetDebugTileInfo(hex) + " " + HexTranslator.GetNormalizedCellPosString(hex));
+        }
+    }
 
     void Initialize()
     {

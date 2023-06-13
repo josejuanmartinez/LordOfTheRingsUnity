@@ -22,11 +22,21 @@ public class PopupManager : MonoBehaviour
     public GameObject okButton;
     public GameObject cancelButton;
     public GameObject grid;
-    public TextMeshProUGUI text;
-    public void Initialize(string title, List<okOption> options, cancelOption cancelOption)
+    public TextMeshProUGUI title;
+    public TextMeshProUGUI description;
+    public Image imageLeft;
+    public Image imageRight;
+
+    public void Initialize(string title, string description, Sprite imageLeft, Sprite imageRight, List<okOption> options, cancelOption cancelOption)
     {
         ShowPopup();
-        text.text = title;
+        this.description.text = description;
+        this.title.text = title;
+
+        this.imageLeft.sprite = imageLeft;
+        this.imageLeft.color = imageLeft != null ? Color.white : Color.clear;
+        this.imageRight.sprite = imageRight;
+        this.imageRight.color = imageRight != null ? Color.white : Color.clear;
 
         int childCount = grid.transform.childCount;
         for(int i = 0; i < childCount;i++)

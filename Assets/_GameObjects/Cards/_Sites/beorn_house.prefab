@@ -67,6 +67,7 @@ MonoBehaviour:
   - rhosgobel
   terrain: 12
   cardType: 0
+  faction: 04000000
   objectTypesFree: 07000000
   objectTypesDark: 04000000
   objectTypesRenegade: 
@@ -76,12 +77,15 @@ MonoBehaviour:
   isHidden: 0
   hasPort: 0
   hasHoard: 0
+  isUnderground: 0
   iDrawFree: 1
   youDrawFree: 1
   iDrawDark: 1
   youDrawDark: 1
   iDrawRenegade: 0
   youDrawRenegade: 0
+  corruption: 0
+  citySpecials: 
   cityId: beorn_house
   regionId: anduin_values
   cityName: Beorn's House
@@ -90,3 +94,4 @@ MonoBehaviour:
   darkSprite: {fileID: 21300000, guid: c334de085b06e954dafa46d366060b19, type: 3}
   renegadeSprite: {fileID: 0}
   balrogSprite: {fileID: 0}
+  lordSprite: {fileID: 0}

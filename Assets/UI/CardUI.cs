@@ -197,17 +197,17 @@ public class CardUI : MonoBehaviour
         potentialLeader = leader;
         okOption option1 = new()
         {
-            text = "Yes",
+            text = "Merge",
             cardBoolFunc = Merge
         };
         cancelOption cancel = new()
         {
-            text = "No",
+            text = "Ignore this turn",
             cardBoolFunc = Cancel
         };
         List<okOption> options = new() { option1 };
 
-        popupManager.Initialize("Do you want " + selected.name + " to join the company of " + leader.name, options, cancel);
+        popupManager.Initialize("Merge companies?", "Do you want " + selected.GetDetails().cardName + " to join the company of " + leader.GetDetails().cardName + "?\n\nThey will move and fight together.", selected.GetDetails().cardSprite, leader.GetDetails().cardSprite, options, cancel);
         button.enabled = false;
     }
 

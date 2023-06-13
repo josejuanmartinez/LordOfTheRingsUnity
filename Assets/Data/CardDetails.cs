@@ -13,6 +13,7 @@ public class CardDetails : MonoBehaviour
     public short victoryPoints;
     public short victoryPointsModifierIfEliminated;
     public short corruption;
+    public short stage;
 
     private bool isInPlay = false;
 
@@ -54,5 +55,12 @@ public class CardDetails : MonoBehaviour
             return null;
         else
             return gameObject.GetComponent<CharacterCardDetails>();
+    }
+    public ObjectCardDetails GetObjectCardDetails()
+    {
+        if (cardClass != CardClass.Object)
+            return null;
+        else
+            return gameObject.GetComponent<ObjectCardDetails>();
     }
 }

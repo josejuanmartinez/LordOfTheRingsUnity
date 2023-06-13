@@ -9,5 +9,6 @@ public enum ObjectTypes
     MinorOnlyBattleItem,
     None,
     NonBattleGearMinorItem,
-    NonBattleGearMajorItem
+    NonBattleGearMajorItem,
+    SpecialItem,
 }

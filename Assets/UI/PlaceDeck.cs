@@ -1,7 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Resources;
+using TMPro;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -14,6 +17,8 @@ public class PlaceDeck : MonoBehaviour
     public Image playbuttonImage;
     public short hideTime = 2;
 
+    public TextMeshProUGUI probabilityText;
+    public CanvasGroup probabilityCanvasGroup;
 
     private SelectedItems selectedItems;
     private DiceManager diceManager;
@@ -32,6 +37,7 @@ public class PlaceDeck : MonoBehaviour
     private Game game;
     private MovementManager movementManager;
     private DeckManager deckManager;
+    private SpritesRepo spritesRepo;
 
     // Start is called before the first frame update
     void Awake()
@@ -39,6 +45,7 @@ public class PlaceDeck : MonoBehaviour
         selectedItems = GameObject.Find("SelectedItems").GetComponent<SelectedItems>();
         diceManager = GameObject.Find("DiceManager").GetComponent<DiceManager>();
         popupManager = GameObject.Find("PopupManager").GetComponent<PopupManager>();
+        spritesRepo = GameObject.Find("SpritesRepo").GetComponent<SpritesRepo>();
         colorBefore = playbuttonImage.color;
         manaPool = GameObject.Find("ManaPool").GetComponent<ManaPool>();
         resourcesManager = GameObject.Find("ResourcesManager").GetComponent<ResourcesManager>();
@@ -46,7 +53,8 @@ public class PlaceDeck : MonoBehaviour
         board = GameObject.Find("Board").GetComponent<Board>();
         game = GameObject.Find("Game").GetComponent<Game>();
         movementManager = GameObject.Find("MovementManager").GetComponent<MovementManager>();
-        deckManager = GameObject.Find("Deck").GetComponent<DeckManager>();
+        deckManager = GameObject.Find("DeckManager").GetComponent<DeckManager>();
+        HideProbability();
     }
 
     // Update is called once per frame
@@ -84,20 +92,20 @@ public class PlaceDeck : MonoBehaviour
                 }
                 
             }
-                
+            HideProbability();
             place.SetActive(true);
         }
         else if (selectedItems.GetSelectedCardDetails() != null)
         {
-            if (placeImage.sprite != selectedItems.GetSelectedCardDetails().cardSprite)
-                placeImage.sprite = selectedItems.GetSelectedCardDetails().cardSprite;
+            CardDetails details = selectedItems.GetSelectedCardDetails();
+            ShowProbability(details);
+            placeImage.sprite = details.cardSprite;
             place.SetActive(true);
         }
         else if (hoverCard != null)
         {
             placeImage.sprite = hoverCard;
             place.SetActive(true);
-
         }
         else
         {
@@ -115,15 +123,17 @@ public class PlaceDeck : MonoBehaviour
             hoverCard = null;
             place.SetActive(false);
         }
-
     }
 
     public void SetHoverCard(CardDetails details)
     {
         hoverCard = details.cardSprite;
+        ShowProbability(details);
     }
+
     public void SetHoverCity(CityDetails details)
     {
+        
         switch (Nations.alignments[game.GetHumanPlayer().GetNation()])
         {
             case AlignmentsEnum.DARK_SERVANTS:
@@ -145,9 +155,39 @@ public class PlaceDeck : MonoBehaviour
                 else
                     hoverCard = details.darkSprite;
                 break;
-        }    
+        }
+        HideProbability();
     }
 
+    private void HideProbability()
+    {
+        probabilityCanvasGroup.alpha = 0;
+        probabilityText.text = "";
+    }
+
+    private void ShowProbability(CardDetails details)
+    {
+        if (details.IsInPlay())
+        {
+            HideProbability();
+            return;
+        }            
+        probabilityCanvasGroup.alpha = 1;
+        probabilityText.text = "";
+        switch (details.cardClass)
+        {
+            case CardClass.Character:
+                probabilityText.text = Math.Truncate(10 * resourcesManager.GetCharacterSuccessProbability(details)).ToString();
+                break;
+            case CardClass.HazardCreature:
+                probabilityText.text = Math.Truncate(10 * manaPool.GetHazardCreatureSuccessProbability(details)).ToString();
+                break;
+            default:
+                HideProbability();
+                break;
+        }
+    }
+    
     public void RemoveHoverCard(CardInPlay card)
     {
         RemoveHoverCard(card.GetDetails());
@@ -156,7 +196,7 @@ public class PlaceDeck : MonoBehaviour
     {
         RemoveHoverCity(city.GetDetails());
     }
-
+    
     public void RemoveHoverCity(CityDetails cityDetails)
     {
         if (hoverCard == cityDetails.darkSprite ||
@@ -172,7 +212,7 @@ public class PlaceDeck : MonoBehaviour
 
     public void SetHoverCard(CardInPlay card)
     {
-        hoverCard = card.GetDetails().cardSprite;
+        SetHoverCard(card.GetDetails());
     }
 
     public string GetOpenGUID()
@@ -193,6 +233,8 @@ public class PlaceDeck : MonoBehaviour
                 PlayCharacter();
             if (selectedItems.IsHazardCreatureSelected())
                 PlayHazardCreature();
+            if (selectedItems.IsObjectSelected())
+                PlayObject();
         }
     }
 
@@ -214,7 +256,23 @@ public class PlaceDeck : MonoBehaviour
             {
                 playbuttonImage.color = Color.green;
                 // Update resources
-                // Remove card from deck
+                if (cardDetails.cardClass == CardClass.Character)
+                {
+                    resourcesManager.RecalculateInfluence(turn.GetCurrentPlayer());
+                    resourcesManager.RefreshInfluence();
+                }                    
+                // Update mana
+                if(cardDetails.cardClass == CardClass.HazardCreature)
+                {
+                    HazardCreatureCardDetails hazard = cardDetails.GetHazardCreatureCardDetails();
+                    foreach(CardTypesEnum cardType in hazard.cardTypes)
+                    {
+                        int newRes = manaPool.manaPool[cardType] > 0 ? manaPool.manaPool[cardType] - 1 : 0;
+                        manaPool.manaPool[cardType] = (short)newRes;
+                    }
+                    manaPool.ToggleDirty();
+                }
+                
             }                
             else
             {
@@ -224,6 +282,7 @@ public class PlaceDeck : MonoBehaviour
         else
             playbuttonImage.color = Color.red;
 
+        deckManager.DiscardAndDraw(cardDetails);
         StartCoroutine(HideDices());
     }
 
@@ -268,6 +327,12 @@ public class PlaceDeck : MonoBehaviour
         StartCoroutine(diceManager.Roll(DiceRollEnum.HazardCreatureRoll, SpawnCardLocation.AtLastCell, selectedItems.GetSelectedCardDetails()));
     }
 
+    public void TapToGetObject()
+    {
+        popupManager.HidePopup();
+        StartCoroutine(diceManager.Roll(DiceRollEnum.ObjectRoll, SpawnCardLocation.AtLastCell, selectedItems.GetSelectedCardDetails()));
+    }
+
     public void PlayCharacter()
     {
         if (selectedItems.GetSelectedCardDetails() == null)
@@ -300,7 +365,7 @@ public class PlaceDeck : MonoBehaviour
                 options.Add(option1);
         }        
 
-        popupManager.Initialize("Where do you want to recruit your character?", options, cancel);
+        popupManager.Initialize("Recruit Character", "Where do you want to recruit <b>" + cc.cardName + "</b>?", cc.cardSprite, spritesRepo.town, options, cancel);
         button.enabled = false;
     }
     public void PlayHazardCreature()
@@ -310,12 +375,12 @@ public class PlaceDeck : MonoBehaviour
 
         okOption option1 = new()
         {
-            text = "At the last visited cell",
+            text = "Last visited cell",
             cardBoolFunc = HazardCreatureAtLastCell
         };
         okOption option2 = new()
         {
-            text = "At Haven",
+            text = "Haven",
             cardBoolFunc = HazardCreatureAtHaven
         };
         cancelOption cancel = new()
@@ -334,7 +399,32 @@ public class PlaceDeck : MonoBehaviour
                 options.Add(option1);
         }
 
-        popupManager.Initialize("Where do you want to spawn a hazard creature?", options, cancel);
+        popupManager.Initialize("Spawn a creature?", "Where do you want to spawn <b>" + cc.cardName + "</b>? By selecting <i>Last visited cell</i>, the creature will appear at the last visited hex.", cc.cardSprite, spritesRepo.wild, options, cancel);
+        button.enabled = false;
+    }
+
+    public void PlayObject()
+    {
+        if (selectedItems.GetSelectedCardDetails() == null)
+            return;
+
+        CardDetails card = selectedItems.GetSelectedCardDetails();
+        if (card == null)
+            return;
+
+        okOption option1 = new()
+        {
+            text = "Tap",
+            cardBoolFunc = TapToGetObject
+        };
+        cancelOption cancel = new()
+        {
+            text = "Cancel",
+            cardBoolFunc = Cancel
+        };
+        List<okOption> options = new() { option1 };
+
+        popupManager.Initialize("Tap place?", "Do you want to tap the place to obtain the object?\n\nTapping makes the site <i>visited</i>, what means you will not be able to obtain anything else in here.\n\n By tapping, you will trigger any automatic attacks towards your company. If the places follows your alignment, the attacks will be of <i>detaintment</i> and your company will not be hurt.", card.cardSprite, spritesRepo.item, options, cancel);
         button.enabled = false;
     }
 

@@ -95,6 +95,18 @@ public class SelectedItems : MonoBehaviour
         }
     }
 
+    public bool IsObjectSelected()
+    {
+        if (selectedCardDetails != null)
+        {
+            return selectedCardDetails.gameObject.GetComponent<ObjectCardDetails>() != null;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     public bool IsCitySelected()
     {
         return selectedCityDetails != null;

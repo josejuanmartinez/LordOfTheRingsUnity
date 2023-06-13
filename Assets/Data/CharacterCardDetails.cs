@@ -24,6 +24,9 @@ public class CharacterCardDetails : MonoBehaviour
     public short mind;
     public short influence;
 
+    public FactionsEnum faction;
+    public List<ObjectCardDetails> objects = new List<ObjectCardDetails>();
+
     private CardDetails cardDetails;
 
     private void Awake()

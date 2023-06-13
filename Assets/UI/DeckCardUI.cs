@@ -25,11 +25,11 @@ public class DeckCardUI : MonoBehaviour
 
     void Awake()
     {
-        deck = GameObject.Find("Deck").GetComponent<DeckManager>();
+        deck = GameObject.Find("DeckManager").GetComponent<DeckManager>();
         pool = GameObject.Find("ManaPool").GetComponent<ManaPool>();
         selectedItems = GameObject.Find("SelectedItems").GetComponent<SelectedItems>();
         placeDeck = GameObject.Find("PlaceDeck").GetComponent<PlaceDeck>();
-        owner = GameObject.Find("Turn").GetComponent<Turn>().GetCurrentPlayer();
+        owner = GameObject.Find("Game").GetComponent<Game>().GetHumanPlayer().GetNation();
         
         button = GetComponent<Button>();
         button.onClick.AddListener(Toggle);
@@ -56,6 +56,12 @@ public class DeckCardUI : MonoBehaviour
                 break;
             case CardClass.Character:
                 button.interactable = deck.IsCharacterCardPlayable(cardDetails, owner);
+                break;
+            case CardClass.Object:
+                button.interactable = deck.IsObjectCardPlayable(cardDetails, owner);
+                break;
+            case CardClass.GoldRing:
+                button.interactable = deck.IsGoldRingCardPlayable(cardDetails, owner);
                 break;
         }
     }

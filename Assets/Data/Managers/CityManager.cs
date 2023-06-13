@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 public class CityManager
 {
@@ -22,11 +23,10 @@ public class CityManager
         return cities.Select(x => x.cityId).Union(cities.Select(x => x.GetDetails().regionId)).ToList();
     }
 
-    /*public List<string> GetCityStringsWithCharactersOfPlayer(NationsEnum owner)
+    public List<CityInPlay> GetCitiesWithCharactersOfPlayer(NationsEnum owner)
     {
-        List<CityInPlay> cities = GetCitiesOfPlayer(owner);
-        return cities.Select(x => x.cityId).ToList();
-    }*/
+        return board.GetTiles().Values.Where(x => x.GetCity() != null && x.GetCards().Any(y => y.GetCardClass() == CardClass.Character && y.owner == owner)).Select(x => x.GetCity()).ToList();
+    }
 
     public CityInPlay GetHavenOfPlayer(NationsEnum owner)
     {
@@ -39,7 +39,7 @@ public class CityManager
         CityInPlay exactMatch = cities.DefaultIfEmpty(null).FirstOrDefault(x => x.cityId == cityName);
         if (exactMatch != null)
             return exactMatch;
-        Random random = new Random();
+        System.Random random = new System.Random();
         if (exactMatch == null)
         {
 
@@ -82,5 +82,10 @@ public class CityManager
             }
         }
         return null;
+    }
+
+    public CityInPlay GetCityAtHex(Vector2Int hex)
+    {
+        return board.GetTiles().Values.Where(x => x.GetCity().hex == hex).Select(x => x.GetCity()).DefaultIfEmpty(null).FirstOrDefault();        
     }
 }

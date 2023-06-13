@@ -67,18 +67,25 @@ MonoBehaviour:
   - rhosgobel
   terrain: 3
   cardType: 1
+  faction: 05000000
   objectTypesFree: 
   objectTypesDark: 
   objectTypesRenegade: 
   automaticAttacksFree: 
   automaticAttacksDark: 10000000
   automaticAttacksRenegade: 
+  isHidden: 0
+  hasPort: 0
+  hasHoard: 0
+  isUnderground: 0
   iDrawFree: 4
   youDrawFree: 4
   iDrawDark: 2
   youDrawDark: 2
   iDrawRenegade: 0
   youDrawRenegade: 0
+  corruption: 0
+  citySpecials: 
   cityId: easterling_camp
   regionId: horse_plains
   cityName: Easterling Camp
@@ -86,3 +93,5 @@ MonoBehaviour:
   freeSprite: {fileID: 21300000, guid: 60592fa40dc48594495fcfbfcb14b03f, type: 3}
   darkSprite: {fileID: 21300000, guid: f3ef00a8b6da07e40aa832388a3ed4ac, type: 3}
   renegadeSprite: {fileID: 0}
+  balrogSprite: {fileID: 0}
+  lordSprite: {fileID: 0}

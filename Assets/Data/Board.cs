@@ -42,7 +42,7 @@ public class Board: MonoBehaviour
         selectedItems = GameObject.Find("SelectedItems").GetComponent<SelectedItems>();
         fowManager = GameObject.Find("FOWManager").GetComponent<FOWManager>();
         movementManager = GameObject.Find("MovementManager").GetComponent<MovementManager>();
-        deckManager = GameObject.Find("Deck").GetComponent<DeckManager>();
+        deckManager = GameObject.Find("DeckManager").GetComponent<DeckManager>();
         initialized = true;
     }
 
@@ -136,6 +136,14 @@ public class Board: MonoBehaviour
         instantiatedObject.transform.SetParent(cardsCanvasTransform);
         instantiatedObject.layer = LayerMask.NameToLayer("UI");
         instantiatedObject.transform.localScale = Vector3.one;
+        CardInPlay card = instantiatedObject.GetComponent<CardInPlay>();
+
+        // Change OWNER
+        card.owner = turn.GetCurrentPlayer();
+        // Change Moved
+        card.moved = MovementConstants.characterMovement;
+        // Finally this will trigger Initialize in CardInPLay, and then CardUI
+        card.cardId = cardId;
 
         bool success = false;
 
@@ -148,6 +156,7 @@ public class Board: MonoBehaviour
                 if(city != null)
                 {
                     hex = city.hex;
+                    card.Initialize(hex);
                     success = true;
                 }
                 else
@@ -168,6 +177,7 @@ public class Board: MonoBehaviour
                         if (city != null)
                         {
                             hex = city.hex;
+                            card.Initialize(hex);
                             success = true;
                         }
                     }
@@ -183,6 +193,7 @@ public class Board: MonoBehaviour
                 if(movementManager.GetLastHex() != MovementManager.NULL2)
                 {
                     hex = movementManager.GetLastHex();
+                    card.Initialize(hex);
                     success = true;
                 }
                 else
@@ -196,23 +207,21 @@ public class Board: MonoBehaviour
                 break;
         }
         if (!success || hex == Vector2.one * int.MinValue)
+        {
+            DestroyImmediate(instantiatedObject);
+            if (tiles[hex].GetCards().Contains(card))
+                tiles[hex].RemoveCard(card);
             return false;
+        }            
+
+        // HEX
+        card.hex = hex;
 
         Vector3 cellWorldCenter = t.GetCellCenterWorld(new Vector3Int(hex.x, hex.y, 0));
 
         gameObject.transform.position = cellWorldCenter;
 
-        CardInPlay cardInPlay = instantiatedObject.GetComponent<CardInPlay>();
-        // Change OWNER
-        cardInPlay.owner = turn.GetCurrentPlayer();
-        // Change Moved
-        cardInPlay.moved = MovementConstants.characterMovement;
-        // HEX
-        cardInPlay.hex = hex;
-        // Finally this will trigger Initialize in CardInPLay, and then CardUI
-        cardInPlay.cardId = cardId;
 
-        deckManager.DiscardAndDraw(cardDetails);
         return true;
     }
 }

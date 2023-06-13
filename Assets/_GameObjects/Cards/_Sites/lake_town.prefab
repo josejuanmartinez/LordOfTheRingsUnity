@@ -67,6 +67,7 @@ MonoBehaviour:
   - rhosgobel
   terrain: 1
   cardType: 2
+  faction: 0d000000
   objectTypesFree: 
   objectTypesDark: 05000000
   objectTypesRenegade: 
@@ -76,6 +77,7 @@ MonoBehaviour:
   isHidden: 0
   hasPort: 0
   hasHoard: 0
+  isUnderground: 0
   iDrawFree: 2
   youDrawFree: 2
   iDrawDark: 2

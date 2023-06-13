@@ -61,6 +61,7 @@ MonoBehaviour:
   victoryPoints: 0
   victoryPointsModifierIfEliminated: 0
   corruption: 0
+  stage: 0
 --- !u!114 &2156722876768731498
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -91,6 +92,8 @@ MonoBehaviour:
   defence: 8
   mind: 4
   influence: 1
+  faction: 13
+  objects: []
 --- !u!222 &9002241949614178889
 CanvasRenderer:
   m_ObjectHideFlags: 0

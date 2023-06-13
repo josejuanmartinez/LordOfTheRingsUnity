@@ -17,6 +17,8 @@ public class CityUI : MonoBehaviour
     public Image icon;
     public Image alignment;
 
+    public CanvasGroup tapped;
+
     public Sprite freeSprite;
     public Sprite darkSprite;
     public Sprite renegadeSprite;
@@ -112,6 +114,8 @@ public class CityUI : MonoBehaviour
         detailsObject.SetActive(false);
 
         isInitialized = true;
+
+        tapped.alpha = 0;
     }
 
     void Update()
@@ -166,5 +170,10 @@ public class CityUI : MonoBehaviour
     public CityInPlay GetCity()
     {
         return city;
+    }
+
+    public void Tap()
+    {
+        tapped.alpha = 1;
     }
 }

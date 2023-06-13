@@ -67,18 +67,25 @@ MonoBehaviour:
   - rhosgobel
   terrain: 2
   cardType: 1
+  faction: 02000000
   objectTypesFree: 0000000002000000
   objectTypesDark: 0000000002000000
   objectTypesRenegade: 
   automaticAttacksFree: 0f000000
   automaticAttacksDark: 0f000000
   automaticAttacksRenegade: 
+  isHidden: 0
+  hasPort: 0
+  hasHoard: 0
+  isUnderground: 0
   iDrawFree: 2
   youDrawFree: 2
   iDrawDark: 2
   youDrawDark: 3
   iDrawRenegade: 0
   youDrawRenegade: 0
+  corruption: 0
+  citySpecials: 
   cityId: wain_easterling_camp
   regionId: rhun
   cityName: Wain-East. Camp
@@ -86,3 +93,5 @@ MonoBehaviour:
   freeSprite: {fileID: 21300000, guid: 54ff78c4c4ea31542a37b1b6c74c4232, type: 3}
   darkSprite: {fileID: 21300000, guid: 4124ac47a743c0641b24b5e5fe735a52, type: 3}
   renegadeSprite: {fileID: 0}
+  balrogSprite: {fileID: 0}
+  lordSprite: {fileID: 0}

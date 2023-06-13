@@ -1,7 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 public enum CardClass
 {
     Place,
@@ -15,5 +11,6 @@ public enum CardClass
     HazardLongEvent,
     HazardShortEvent,
     HazardCreature,
-    Ally
+    Ally,
+    GoldRing
 }

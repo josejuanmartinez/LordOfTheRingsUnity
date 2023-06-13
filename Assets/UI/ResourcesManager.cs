@@ -27,11 +27,6 @@ public class ResourcesManager : MonoBehaviour
         turn = GameObject.Find("Turn").GetComponent<Turn>();
     }
 
-    private void Update()
-    {
-        ShowInfluence();
-    }
-
     public void Initialize(NationsEnum nation, CityProduction cityProduction)
     {
         if (!stores.ContainsKey(nation))
@@ -44,6 +39,7 @@ public class ResourcesManager : MonoBehaviour
 
         RecalculateCityProduction(nation);
         RecalculateNationConsumptions(nation);
+        RecalculateInfluences();
     }
 
     public void RecalculateCityProduction(NationsEnum nation)
@@ -105,38 +101,39 @@ public class ResourcesManager : MonoBehaviour
         {
             if ((NationsEnum)i == NationsEnum.NONE)
                 continue;
-            influences[(NationsEnum)i] = RecalculateInfluence((NationsEnum)i);
+            influences[(NationsEnum)i] = GetFreeInfluence((NationsEnum)i, true);
         }
+        RefreshInfluence();
     }
 
-    public short RecalculateInfluence(NationsEnum nation)
+    public void RecalculateInfluence(NationsEnum nation)
     {
         short freeInfluence = Nations.INFLUENCE;
         List<CardInPlay> characters = board.GetCharacterManager().GetCharactersOfPlayer(nation);
         foreach (CardInPlay character in characters)
             freeInfluence -= character.GetCharacterDetails().mind;
         
-        return freeInfluence;
+        influences[nation] = freeInfluence;
     }
 
-    public short GetFreeInfluence(NationsEnum nation)
+    public void RefreshInfluence()
     {
-        if (!influences.ContainsKey(nation))
-            RecalculateInfluences();
+        influence.text = influences[turn.GetCurrentPlayer()].ToString();
+    }
+
+    public short GetFreeInfluence(NationsEnum nation, bool dirty)
+    {
+        if (!influences.ContainsKey(nation) || dirty)
+            RecalculateInfluence(nation);
         return influences[nation];
-    }
-
-    public void ShowInfluence()
-    {
-        influence.text = GetFreeInfluence(turn.GetCurrentPlayer()).ToString();
     }
 
     public float GetCharacterSuccessProbability(CardDetails cardDetails)
     {
         if (cardDetails.GetCharacterCardDetails() == null)
             return 0f;
-        
-        short influence = GetFreeInfluence(turn.GetCurrentPlayer());
+
+        short influence = GetFreeInfluence(turn.GetCurrentPlayer(), false);
 
         if (cardDetails.GetCharacterCardDetails().mind > influence)
             return 0f;
