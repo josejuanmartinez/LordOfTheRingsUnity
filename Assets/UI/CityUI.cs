@@ -8,13 +8,11 @@ public class CityUI : MonoBehaviour
 {
     public GameObject displacement;
     public GameObject detailsObject;
-    public TextMeshProUGUI food;
-    public TextMeshProUGUI gold;
-    public TextMeshProUGUI prod;
+    public TextMeshProUGUI detailsText;
     public TextMeshProUGUI cityName;
     public Button button;
     public Image health;
-    public Image icon;
+    public Image citySprite;
     public Image alignment;
 
     public CanvasGroup tapped;
@@ -66,21 +64,19 @@ public class CityUI : MonoBehaviour
 
         gameObject.transform.position = cellWorldCenter;
 
-        gold.text = Sprites.gold + details.production.gold.ToString();
-        prod.text = Sprites.prod + details.production.prod.ToString();
-        food.text = Sprites.food + details.production.food.ToString();
+        detailsText.text = Sprites.gold + details.production.gold.ToString() + "\n" +  Sprites.prod + details.production.prod.ToString() + "\n" + Sprites.food + details.production.food.ToString();
 
         switch(game.GetHumanPlayer().GetAlignment())
         {
             case AlignmentsEnum.FREE_PEOPLE:
             case AlignmentsEnum.NEUTRAL:
-                icon.sprite = details.freeSprite;
+                citySprite.sprite = details.freeSprite;
                 break;
             case AlignmentsEnum.DARK_SERVANTS:
-                icon.sprite = details.darkSprite;
+                citySprite.sprite = details.darkSprite;
                 break;
             case AlignmentsEnum.RENEGADE:
-                icon.sprite = details.renegadeSprite != null ? details.renegadeSprite : details.darkSprite;
+                citySprite.sprite = details.renegadeSprite != null ? details.renegadeSprite : details.darkSprite;
                 break;
         }
 

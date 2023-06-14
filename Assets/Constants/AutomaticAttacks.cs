@@ -95,7 +95,7 @@ public static class AutomaticAttack
         { AutomaticAttackEnum.Men18, new AutomaticAttackStruct( RacesEnum.Man, 1, 8, 0) },
         { AutomaticAttackEnum.MenAll9, new AutomaticAttackStruct( RacesEnum.Man, -1, 9, 0) },
         { AutomaticAttackEnum.MenAll7, new AutomaticAttackStruct( RacesEnum.Man, -1, 7, 0) },
-        { AutomaticAttackEnum.MenAll7, new AutomaticAttackStruct( RacesEnum.Man, 4, 9, 0) },
+        { AutomaticAttackEnum.Men49, new AutomaticAttackStruct( RacesEnum.Man, 4, 9, 0) },
         { AutomaticAttackEnum.Animals55, new AutomaticAttackStruct( RacesEnum.Animal, 5, 5, 0) },
         { AutomaticAttackEnum.Men37, new AutomaticAttackStruct( RacesEnum.Man, 3, 7, 0) },
         { AutomaticAttackEnum.Men48, new AutomaticAttackStruct( RacesEnum.Man, 4, 8, 0) },

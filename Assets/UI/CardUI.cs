@@ -11,11 +11,8 @@ using UnityEngine.UI;
 public class CardUI : MonoBehaviour
 {
     public GameObject displacement;
-    //public GameObject detailsObject;
+    public TextMeshProUGUI details;
     public TextMeshProUGUI cardName;
-    //public TextMeshProUGUI prowess;
-    //public TextMeshProUGUI defence;
-    //public TextMeshProUGUI movement;
 
     public Sprite freeSprite;
     public Sprite darkSprite;
@@ -68,6 +65,7 @@ public class CardUI : MonoBehaviour
         moveOnTilemap = GameObject.Find("MovementManager").GetComponent<MovementManager>();
         colorManager = GameObject.Find("ColorManager").GetComponent<ColorManager>();
         popupManager = GameObject.Find("PopupManager").GetComponent<PopupManager>();
+        details.text = "";
     }
 
     public void Initialize()
