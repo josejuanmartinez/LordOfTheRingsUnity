@@ -223,7 +223,6 @@ GameObject:
   m_Component:
   - component: {fileID: 197634510254987540}
   - component: {fileID: 6000456651097758773}
-  - component: {fileID: 2417009866226777661}
   m_Layer: 6
   m_Name: CombatPopup
   m_TagString: Untagged
@@ -266,29 +265,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6253575452058926186}
   m_CullTransparentMesh: 1
---- !u!114 &2417009866226777661
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6253575452058926186}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: af50b976a688083499a089b3c477055b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  citySprite: {fileID: 65723680629371194}
-  defendersPrefab: {fileID: 1212617148325164481, guid: afa6c595fbe2777408d4001990a9ed98, type: 3}
-  attackersPrefab: {fileID: 6208404898719938483, guid: 08dba04e5aee30441aa71928d189ae77, type: 3}
-  strikePrefab: {fileID: 8043922243652648528, guid: 6329f5ae671a47d4882a0456f2d6e6da, type: 3}
-  defenders: {fileID: 5891324732622277047}
-  attackers: {fileID: 358698303304001551}
-  attacksDebug: 0000000001000000020000000d000000
-  cardInPlayPrefabDebug: {fileID: 6735845551989982089, guid: b71563a418c27024da048e17a8f39e59, type: 3}
-  cityDetailsDebug: {fileID: 785537026334147327, guid: 2bd8752cb34aac54ba49ab012777e0aa, type: 3}
-  debug: 0
-  isInitialized: 0
 --- !u!1 &6881748896080732907
 GameObject:
   m_ObjectHideFlags: 0

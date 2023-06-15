@@ -7,7 +7,10 @@ using UnityEngine.UI;
 
 public class CombatPopupManager : MonoBehaviour
 {
+    public GameObject popup;
+
     public Image citySprite;
+    public TextMeshProUGUI title;
     public GameObject defendersPrefab;
     public GameObject attackersPrefab;
     public GameObject strikePrefab;
@@ -23,12 +26,14 @@ public class CombatPopupManager : MonoBehaviour
     public bool isInitialized = false;
 
     private Board board;
+    private SpritesRepo spriteRepo;
 
     void Awake()
     {
         board = GameObject.Find("Board").GetComponent<Board>();
-        
+        spriteRepo = GameObject.Find("SpritesRepo").GetComponent<SpritesRepo>();
     }
+
     public void Initialize(List<AutomaticAttackEnum> attacks, CardInPlay card, CityDetails cityDetails)
     {
         if (card.GetDetails() == null)
@@ -36,20 +41,10 @@ public class CombatPopupManager : MonoBehaviour
         CardDetails cardDetails = card.GetDetails();
         if (cardDetails.GetCharacterCardDetails() == null)
             return;
+        title.text = "Encounter at " + cityDetails.cityName;
+        
+        citySprite.sprite = cityDetails.GetSprite(cardDetails.GetCardInPlay().owner);
 
-        switch (Nations.alignments[cardDetails.GetCardInPlay().owner])
-        {
-            case AlignmentsEnum.FREE_PEOPLE:
-            case AlignmentsEnum.NEUTRAL:
-                citySprite.sprite = cityDetails.freeSprite;
-                break;
-            case AlignmentsEnum.DARK_SERVANTS:
-                citySprite.sprite = cityDetails.darkSprite;
-                break;
-            case AlignmentsEnum.RENEGADE:
-                citySprite.sprite = cityDetails.renegadeSprite != null ? cityDetails.renegadeSprite : cityDetails.darkSprite;
-                break;
-        }
         for(int i=defenders.transform.childCount-1; i>=0; i--)
             DestroyImmediate(defenders.transform.GetChild(i).gameObject);
         
@@ -59,12 +54,13 @@ public class CombatPopupManager : MonoBehaviour
         foreach (AutomaticAttackEnum attack in attacks)
         {
             GameObject attacker = Instantiate(attackersPrefab, attackers.transform);
+            attacker.GetComponent<Attacker>().Initialize(spriteRepo.GetRaceSprite(AutomaticAttack.automaticAttacks[attack].race));
             int strikes = AutomaticAttack.automaticAttacks[attack].strikes;
             int prowess = AutomaticAttack.automaticAttacks[attack].prowess;
             for(int i=0; i<strikes; i++)
             {
                 GameObject strike = Instantiate(strikePrefab, attacker.transform.Find("StrikeGrids"));
-                strike.transform.Find("Prowess").GetComponent<TextMeshProUGUI>().text = prowess.ToString();
+                strike.GetComponent<DragDrop>().Initialize(prowess);
             }
         }
                 
@@ -91,5 +87,20 @@ public class CombatPopupManager : MonoBehaviour
             Initialize(attacksDebug, cardInPlayDebug, cityDetailsDebug);
             
         }    
+    }
+
+    public void ShowPopup()
+    {
+        popup.gameObject.SetActive(true);
+    }
+
+    public void HidePopup()
+    {
+        popup.gameObject.SetActive(false);
+    }
+
+    public bool IsShown()
+    {
+        return popup.gameObject.activeSelf;
     }
 }

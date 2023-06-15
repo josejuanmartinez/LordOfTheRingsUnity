@@ -24,6 +24,7 @@ public class PlaceDeck : MonoBehaviour
     private DiceManager diceManager;
     private Sprite hoverCard;
     private PopupManager popupManager;
+    private CombatPopupManager combatPopupManager;
 
     private string openGuid = string.Empty;
     private Color colorBefore;
@@ -45,6 +46,7 @@ public class PlaceDeck : MonoBehaviour
         selectedItems = GameObject.Find("SelectedItems").GetComponent<SelectedItems>();
         diceManager = GameObject.Find("DiceManager").GetComponent<DiceManager>();
         popupManager = GameObject.Find("PopupManager").GetComponent<PopupManager>();
+        combatPopupManager = GameObject.Find("CombatPopupManager").GetComponent<CombatPopupManager>();
         spritesRepo = GameObject.Find("SpritesRepo").GetComponent<SpritesRepo>();
         colorBefore = playbuttonImage.color;
         manaPool = GameObject.Find("ManaPool").GetComponent<ManaPool>();
@@ -68,29 +70,8 @@ public class PlaceDeck : MonoBehaviour
                 placeImage.sprite != selectedItems.GetSelectedCityDetails().balrogSprite &&
                 placeImage.sprite != selectedItems.GetSelectedCityDetails().lordSprite)
             {
-                switch(Nations.alignments[game.GetHumanPlayer().GetNation()])
-                {
-                    case AlignmentsEnum.DARK_SERVANTS:
-                        placeImage.sprite = selectedItems.GetSelectedCityDetails().darkSprite;
-                        break;
-                    case AlignmentsEnum.FREE_PEOPLE:
-                    case AlignmentsEnum.NEUTRAL:
-                        placeImage.sprite = selectedItems.GetSelectedCityDetails().freeSprite;
-                        break;
-                    case AlignmentsEnum.RENEGADE:
-                        if (selectedItems.GetSelectedCityDetails().renegadeSprite != null)
-                            placeImage.sprite = selectedItems.GetSelectedCityDetails().renegadeSprite;
-                        else
-                            placeImage.sprite = selectedItems.GetSelectedCityDetails().darkSprite;
-                        break;
-                    case AlignmentsEnum.CHAOTIC:
-                        if (selectedItems.GetSelectedCityDetails().balrogSprite!= null)
-                            placeImage.sprite = selectedItems.GetSelectedCityDetails().balrogSprite;
-                        else
-                            placeImage.sprite = selectedItems.GetSelectedCityDetails().darkSprite;
-                        break;
-                }
-                
+                CityDetails cityDetails = selectedItems.GetSelectedCityDetails();
+                placeImage.sprite = cityDetails.GetSprite(turn.GetCurrentPlayer());
             }
             HideProbability();
             place.SetActive(true);
@@ -133,29 +114,7 @@ public class PlaceDeck : MonoBehaviour
 
     public void SetHoverCity(CityDetails details)
     {
-        
-        switch (Nations.alignments[game.GetHumanPlayer().GetNation()])
-        {
-            case AlignmentsEnum.DARK_SERVANTS:
-                hoverCard = details.darkSprite;
-                break;
-            case AlignmentsEnum.FREE_PEOPLE:
-            case AlignmentsEnum.NEUTRAL:
-                hoverCard = details.freeSprite;
-                break;
-            case AlignmentsEnum.RENEGADE:
-                if (selectedItems.GetSelectedCityDetails().renegadeSprite != null)
-                    hoverCard = details.renegadeSprite;
-                else
-                    hoverCard = details.darkSprite;
-                break;
-            case AlignmentsEnum.CHAOTIC:
-                if (selectedItems.GetSelectedCityDetails().balrogSprite != null)
-                    hoverCard = details.balrogSprite;
-                else
-                    hoverCard = details.darkSprite;
-                break;
-        }
+        hoverCard = details.GetSprite(turn.GetCurrentPlayer());
         HideProbability();
     }
 
@@ -330,7 +289,24 @@ public class PlaceDeck : MonoBehaviour
     public void TapToGetObject()
     {
         popupManager.HidePopup();
-        StartCoroutine(diceManager.Roll(DiceRollEnum.ObjectRoll, SpawnCardLocation.AtLastCell, selectedItems.GetSelectedCardDetails()));
+
+        CardDetails objectDetails = selectedItems.GetSelectedCardDetails();
+        if(objectDetails != null)
+        {
+            CardDetails characterDetails = selectedItems.GetLastSelectedChar();
+            if(characterDetails != null && characterDetails.GetCardInPlay() != null)
+            {
+                CardInPlay cardInPlay = characterDetails.GetCardInPlay();
+                CityInPlay city = board.GetCityManager().GetCityAtHex(cardInPlay.GetHex());
+                if(city != null && city.GetDetails() !=null)
+                {
+                    CityDetails cityDetails = city.GetDetails();
+                    List<AutomaticAttackEnum> attacks = cityDetails.GetAutomaticAttacks(turn.GetCurrentPlayer());
+                    combatPopupManager.ShowPopup();
+                    combatPopupManager.Initialize(attacks, cardInPlay, cityDetails);
+                }
+            }
+        }
     }
 
     public void PlayCharacter()
@@ -393,13 +369,21 @@ public class PlaceDeck : MonoBehaviour
         CardDetails cc = selectedItems.GetSelectedCardDetails();
         if (cc != null)
         {
-            if (deckManager.CanSpawnAtHaven(turn.GetCurrentPlayer()))
-                options.Add(option2);
             if (deckManager.CanSpawnAtLastHex())
                 options.Add(option1);
+            if (deckManager.CanSpawnAtHaven(turn.GetCurrentPlayer()))
+                options.Add(option2);            
         }
 
-        popupManager.Initialize("Spawn a creature?", "Where do you want to spawn <b>" + cc.cardName + "</b>? By selecting <i>Last visited cell</i>, the creature will appear at the last visited hex.", cc.cardSprite, spritesRepo.wild, options, cancel);
+        string message = "Where do you want to spawn <b>" + cc.cardName + "</b>?\n\n";
+        if(options.Contains(option1))
+            message += "By selecting <i>Last visited cell</i>, the creature will appear at " + selectedItems.GetLastSelectedChar().cardName + " position.";
+
+        Sprite sprite = spritesRepo.wild;
+        if (!options.Contains(option1))
+            sprite = spritesRepo.town;
+
+        popupManager.Initialize("Spawn a creature?", message, cc.cardSprite, sprite, options, cancel);
         button.enabled = false;
     }
 
@@ -412,6 +396,20 @@ public class PlaceDeck : MonoBehaviour
         if (card == null)
             return;
 
+        CardDetails characterDetails = selectedItems.GetLastSelectedChar();
+        if (characterDetails == null)
+            return;
+        if (characterDetails.GetCardInPlay() == null)
+            return;
+
+        CityInPlay cityInPlay = board.GetCityManager().GetCityAtHex(characterDetails.GetCardInPlay().GetHex());
+        if (cityInPlay == null)
+            return;
+        
+        CityDetails cityDetails = cityInPlay.GetDetails();
+        if (cityDetails == null)
+            return;
+        
         okOption option1 = new()
         {
             text = "Tap",
@@ -424,7 +422,7 @@ public class PlaceDeck : MonoBehaviour
         };
         List<okOption> options = new() { option1 };
 
-        popupManager.Initialize("Tap place?", "Do you want to tap the place to obtain the object?\n\nTapping makes the site <i>visited</i>, what means you will not be able to obtain anything else in here.\n\n By tapping, you will trigger any automatic attacks towards your company. If the places follows your alignment, the attacks will be of <i>detaintment</i> and your company will not be hurt.", card.cardSprite, spritesRepo.item, options, cancel);
+        popupManager.Initialize("Tap place?", "Do you want to tap the place to obtain the object?\n\nTapping makes the site <i>visited</i>, what means you will not be able to obtain anything else in here.\n\n By tapping, you will trigger any automatic attacks towards your company. If the places follows your alignment, the attacks will be of <i>detaintment</i> and your company will not be hurt.", card.cardSprite, cityDetails.GetSprite(turn.GetCurrentPlayer()), options, cancel);
         button.enabled = false;
     }
 

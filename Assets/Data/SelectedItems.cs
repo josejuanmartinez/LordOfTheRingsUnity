@@ -15,6 +15,8 @@ public class SelectedItems : MonoBehaviour
 
     private bool isDeck = false;
 
+    public CardDetails lastSelectedChar = null;
+
     private void Awake()
     {
         moveOnTilemap = GameObject.Find("MovementManager").GetComponent<MovementManager>();
@@ -51,6 +53,10 @@ public class SelectedItems : MonoBehaviour
 
         // COMPANY
         selectedCompany = board.GetCharacterManager().GetCharactersInCompanyOf(cardDetails);
+
+        // I REMEMBER LAST SELECTED
+        if(cardDetails.cardClass == CardClass.Character && cardDetails.IsInPlay())
+            lastSelectedChar = cardDetails;
 
         this.isDeck = isDeck;
     }
@@ -179,5 +185,16 @@ public class SelectedItems : MonoBehaviour
     public List<CardInPlay> GetCompany()
     {
         return selectedCompany;
+    }
+
+    public CardDetails GetLastSelectedChar()
+    {
+        if (lastSelectedChar == null)
+            return null;
+        
+        if (lastSelectedChar.GetCardInPlay() == null)
+            return null;
+        
+        return lastSelectedChar;
     }
 }

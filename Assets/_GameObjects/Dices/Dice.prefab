@@ -738,6 +738,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 11400000, guid: a7d97a6373e22f94c8e2d68ea3b8195e, type: 3}
+      propertyPath: forceStrength
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: a7d97a6373e22f94c8e2d68ea3b8195e, type: 3}
       propertyPath: rotationSpeed
       value: 40000
       objectReference: {fileID: 0}
@@ -748,6 +752,10 @@ PrefabInstance:
     - target: {fileID: 11400000, guid: a7d97a6373e22f94c8e2d68ea3b8195e, type: 3}
       propertyPath: rotationAxis.z
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: a7d97a6373e22f94c8e2d68ea3b8195e, type: 3}
+      propertyPath: rotationDuration
+      value: 0.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -48,6 +48,7 @@ public class CardUI : MonoBehaviour
     private Tilemap t;
     private SelectedItems selectedItems;
     private Game game;
+    private Turn turn;
 
     private Vector3 currentDisplacementPosition = Vector3.zero;
     private Vector3 currentPosition = Vector3.zero;
@@ -65,18 +66,24 @@ public class CardUI : MonoBehaviour
         moveOnTilemap = GameObject.Find("MovementManager").GetComponent<MovementManager>();
         colorManager = GameObject.Find("ColorManager").GetComponent<ColorManager>();
         popupManager = GameObject.Find("PopupManager").GetComponent<PopupManager>();
+        turn = GameObject.Find("Turn").GetComponent<Turn>();
+
         details.text = "";
     }
 
     public void Initialize()
     {
+        if (!game.IsInitialized() || !turn.IsInitialized())
+            return;
+
         card = GetComponent<CardInPlay>();
-        button.interactable = card.owner == game.GetHumanPlayer().GetNation();
 
         if(card == null)
             return;
         if (!card.IsInitialized())
             return;
+
+        button.interactable = card.owner == turn.GetCurrentPlayer();
 
         cardName.text = card.GetDetails().cardName;
         icon.sprite = card.GetDetails().cardSprite;
@@ -100,12 +107,9 @@ public class CardUI : MonoBehaviour
         allCards = board.GetTile(card.GetHex()).GetCards();
         totalCardsAtHex = 0;
         foreach(CardInPlay c in allCards)
-        {
             if(c.GetCompanyLeader() == null)
-            {
                 totalCardsAtHex++;
-            }
-        }
+        
         //totalCardsAtHex = allCards.Select(x => x.GetCompanyLeader() == null).Count();
         cardPositionAtHex = allCards.IndexOf(card);
 
@@ -244,7 +248,7 @@ public class CardUI : MonoBehaviour
     }
     public void Toggle()
     {
-        if(game.GetHumanPlayer().GetNation() != card.owner)
+        if(turn.GetCurrentPlayer() != card.owner)
         {
             isOpen = false;
             return;
@@ -299,5 +303,9 @@ public class CardUI : MonoBehaviour
         selectedItems.SelectCardDetails(card.GetDetails(), false);
         allCards.Remove(card);
         allCards.Insert(newPosition, card);
+    }
+    public bool IsMoving()
+    {
+        return isMoving;
     }
 }

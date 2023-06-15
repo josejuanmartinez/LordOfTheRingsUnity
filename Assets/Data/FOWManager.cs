@@ -11,22 +11,20 @@ public class FOWManager : MonoBehaviour
     public short cityVisionLevel = 5;
     public short cardVisionLevel = 3;
     public Tile fowTile;
+    
     Tilemap fow;
     Board board;
     Game game;
+    Turn turn;
 
     bool isInitialized = false;
-
-    void Awake()
-    {
-        
-    }
 
     void Initialize()
     {
         fow = GameObject.Find("FOWTilemap").GetComponent<Tilemap>();
         board = GameObject.Find("Board").GetComponent<Board>();
         game = GameObject.Find("Game").GetComponent<Game>();
+        turn = GameObject.Find("Turn").GetComponent<Turn>();
         isInitialized = true;
     }
 
@@ -38,7 +36,7 @@ public class FOWManager : MonoBehaviour
         if (!isInitialized)
             return;
 
-        List <CityInPlay> cities = board.GetCityManager().GetCitiesOfPlayer(game.GetHumanPlayer().GetNation()); 
+        List <CityInPlay> cities = board.GetCityManager().GetCitiesOfPlayer(turn.GetCurrentPlayer()); 
         foreach (CityInPlay city in cities)
         {
             UpdateCityFOW(city);
@@ -79,7 +77,7 @@ public class FOWManager : MonoBehaviour
         if (!isInitialized)
             return;
 
-        List<CardInPlay> cards = board.GetCardManager().GetCardsOfPlayer(game.GetHumanPlayer().GetNation());
+        List<CardInPlay> cards = board.GetCardManager().GetCardsOfPlayer(turn.GetCurrentPlayer());
         foreach (CardInPlay card in cards)
         {
             UpdateCardFOW(card);

@@ -95,6 +95,50 @@ public class CityDetails: MonoBehaviour
     {
         return tappers.Contains(nationEnum);
     }
+
+    public Sprite GetSprite(NationsEnum nation)
+    {
+        switch (Nations.alignments[nation])
+        {
+            case AlignmentsEnum.DARK_SERVANTS:
+                return darkSprite;
+            case AlignmentsEnum.FREE_PEOPLE:
+            case AlignmentsEnum.NEUTRAL:
+                return freeSprite;
+            case AlignmentsEnum.RENEGADE:
+                if (renegadeSprite != null)
+                    return renegadeSprite;
+                else
+                    return darkSprite;
+            case AlignmentsEnum.CHAOTIC:
+                if (balrogSprite != null)
+                    return balrogSprite;
+                else
+                    return darkSprite;
+            default:
+                return freeSprite;
+        }
+    }
+
+    public List<AutomaticAttackEnum> GetAutomaticAttacks(NationsEnum nation)
+    {
+        switch (Nations.alignments[nation])
+        {
+            case AlignmentsEnum.FREE_PEOPLE:
+            case AlignmentsEnum.NEUTRAL:
+                return automaticAttacksFree;
+            case AlignmentsEnum.CHAOTIC:
+            case AlignmentsEnum.DARK_SERVANTS:
+                return automaticAttacksDark;
+            case AlignmentsEnum.RENEGADE:
+                if (automaticAttacksRenegade.Count > 0)
+                    return automaticAttacksRenegade;
+                else
+                    return automaticAttacksDark;
+            default:
+                return automaticAttacksFree;
+        }
+    }
 }
 
 public static class CityDataGenerator

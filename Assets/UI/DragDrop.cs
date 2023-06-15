@@ -1,25 +1,31 @@
-using System.Collections;
-using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class DragDrop : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, IEndDragHandler, IDragHandler
 {
-    [SerializeField] private Canvas canvas;
-    [SerializeField] private GridLayoutGroup gridLayout;
+    public TextMeshProUGUI prowess;
 
+    
+    private bool isInitialized = false;
+
+    private GridLayoutGroup gridLayout;
     private RectTransform rectTransform;
     private CanvasGroup canvasGroup;
 
-    private void Awake()
+    public void Initialize(int prowess)
     {
         rectTransform = GetComponent<RectTransform>();
         canvasGroup = GetComponent<CanvasGroup>();
+        gridLayout = transform.parent.GetComponent<GridLayoutGroup>();
+        this.prowess.text = prowess.ToString();
+        isInitialized = true;
     }
     public void OnPointerDown(PointerEventData eventData)
     {
-        gridLayout.enabled = false;
+        if(gridLayout != null)
+            gridLayout.enabled = false;
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
@@ -30,7 +36,8 @@ public class DragDrop : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, I
     {
         canvasGroup.alpha = 1f;
         canvasGroup.blocksRaycasts = true;
-        gridLayout.enabled = true;
+        if (gridLayout != null)
+            gridLayout.enabled = true;
     }
     public void OnDrag(PointerEventData eventData)
     {

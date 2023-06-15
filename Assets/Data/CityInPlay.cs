@@ -19,6 +19,7 @@ public class CityInPlay : MonoBehaviour
     private PlaceDeck placeDeck;
     private CityUI cityUI;
     private Game game;
+    private Turn turn;
 
     void Awake()
     {
@@ -28,10 +29,11 @@ public class CityInPlay : MonoBehaviour
         placeDeck = GameObject.Find("PlaceDeck").GetComponent<PlaceDeck>();
         cityUI = GetComponent<CityUI>();
         game = GameObject.Find("Game").GetComponent<Game>();
+        turn = GameObject.Find("Turn").GetComponent<Turn>();
     }
     void Initialize()
     {
-        if (board.IsInitialized() && cardDetailsRepo.IsInitialized() && !string.IsNullOrEmpty(cityId))
+        if (board.IsInitialized() && cardDetailsRepo.IsInitialized() && !string.IsNullOrEmpty(cityId) && game.IsInitialized() && turn.IsInitialized())
         {
             GameObject cityObject = Instantiate(cardDetailsRepo.GetCityDetails(cityId));
             cityObject.name = cityId + "_details";
@@ -89,7 +91,7 @@ public class CityInPlay : MonoBehaviour
     public void Tap(NationsEnum nation)
     {
         details.Tap(nation);
-        if(nation == game.GetHumanPlayer().GetNation())
+        if(nation == turn.GetCurrentPlayer())
             cityUI.Tap();
     }
 }

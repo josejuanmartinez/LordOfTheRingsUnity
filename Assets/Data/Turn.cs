@@ -14,30 +14,58 @@ public class Turn : MonoBehaviour
     private Board board;
     private Game game;
     private bool isNewTurn = true;
+    private bool isInitialized = false;
+    
     private CameraController cameraController;
+    private FOWManager fowManager;
+
     private void Awake()
     {
         board = GameObject.Find("Board").GetComponent<Board>();
         game = GameObject.Find("Game").GetComponent<Game>();
         cameraController = Camera.main.GetComponent<CameraController>();
-        isNewTurn = true;
+        fowManager = GameObject.Find("FOWManager").GetComponent<FOWManager>();
+    }
+
+    public void Initialize()
+    {
+        if(board.IsInitialized() && game.IsInitialized())
+        {
+            AddTurn();
+            turnText.text = turnNumber.ToString();
+            currentTurnPlayer = game.GetHumanPlayer().GetNation();
+            isInitialized = true;
+        }
+        
     }
 
     void Update()
     {
+        if (!isInitialized)
+        {
+            Initialize();
+            return;
+        }            
+        
         if (isDirty)
             turnText.text = turnNumber.ToString();
-        if (board.IsInitialized() && game.IsInitialized())
+        
+        if (isNewTurn)
         {
-            if (isNewTurn)
-            {
-                CardInPlay avatar = board.GetCharacterManager().GetAvatar(game.GetHumanPlayer().GetNation());
-                if (avatar)
-                    cameraController.LookToCard(avatar);
-                currentTurnPlayer = game.GetHumanPlayer().GetNation();
-                isNewTurn = false;
-            }
+            fowManager.UpdateCitiesFOW();
+            fowManager.UpdateCardsFOW();
+            CardInPlay avatar = board.GetCharacterManager().GetAvatar(GetCurrentPlayer());
+            if (avatar)
+                cameraController.LookToCard(avatar);
+            isNewTurn = false;
+
+            
         }
+    }
+
+    public bool IsInitialized()
+    {
+        return isInitialized;
     }
 
     public void AddTurn()

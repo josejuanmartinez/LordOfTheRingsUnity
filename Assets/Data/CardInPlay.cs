@@ -24,6 +24,9 @@ public class CardInPlay : MonoBehaviour
     private CardUI cardUI;
     private string inCompanyOf;
 
+    private Game game;
+    private Turn turn;
+
     void Awake()
     {
         cardDetailsRepo = GameObject.Find("CardDetailsRepo").GetComponent<CardDetailsRepo>();
@@ -31,10 +34,12 @@ public class CardInPlay : MonoBehaviour
         resourcesManager = GameObject.Find("ResourcesManager").GetComponent<ResourcesManager>();
         placeDeck = GameObject.Find("PlaceDeck").GetComponent<PlaceDeck>();
         cardUI = GetComponent<CardUI>();
+        game = GameObject.Find("Game").GetComponent<Game>();
+        turn = GameObject.Find("Turn").GetComponent<Turn>();
     }
     public void Initialize(Vector2Int hex)
     {
-        if (board.IsInitialized() && cardDetailsRepo.IsInitialized() && !string.IsNullOrEmpty(cardId))
+        if (board.IsInitialized() && cardDetailsRepo.IsInitialized() && !string.IsNullOrEmpty(cardId) && game.IsInitialized() && turn.IsInitialized())
         {
             this.hex = hex;
             board.AddCard(hex, this);
@@ -189,5 +194,12 @@ public class CardInPlay : MonoBehaviour
         this.hex = hex;
         List<CardInPlay> company = board.GetCharacterManager().GetCharactersInCompanyOf(details);
         company.ForEach(x => x.hex = hex);
+    }
+
+    public bool IsMoving()
+    {
+        if (cardUI != null)
+            return cardUI.IsMoving();
+        return false;
     }
 }

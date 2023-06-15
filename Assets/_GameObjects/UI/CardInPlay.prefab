@@ -453,7 +453,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Uvatha The Ringwraith
+  m_text: "Kham\xFBl the Ringwraith"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: e73a58f6e2794ae7b1b7e50b7fb811b0, type: 2}
@@ -638,7 +638,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 9026700890513304948, guid: f6b3e6f89d4cdc04f85911986c3f4658, type: 3}
+  m_Sprite: {fileID: -9123289345285641849, guid: 0c8a1cbadf8544249a1efb96fe9b2c87, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1106,7 +1106,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 267.5, y: 231.7}
-  m_SizeDelta: {x: 23.03, y: 19.89}
+  m_SizeDelta: {x: 24, y: 24}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &5980144743374158759
 MonoBehaviour:
@@ -1146,10 +1146,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d150a3002b8529498c9d7c36b71fd40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardId: uvatha
-  owner: 1
+  cardId: khamul
+  owner: 2
   moved: 0
-  hex: {x: 45, y: 11}
+  hex: {x: 9, y: 12}
 --- !u!1 &8289044454119597308
 GameObject:
   m_ObjectHideFlags: 0

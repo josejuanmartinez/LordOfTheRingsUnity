@@ -33,7 +33,7 @@ public class CityUI : MonoBehaviour
     private SelectedItems selectedItems;
     private Tilemap t;
     private Game game;
-
+    private Turn turn;
     private bool isInitialized = false;
 
     private void Awake()
@@ -42,21 +42,23 @@ public class CityUI : MonoBehaviour
         selectedItems = GameObject.Find("SelectedItems").GetComponent<SelectedItems>();
         t = GameObject.Find("CardTypeTilemap").GetComponent<Tilemap>();
         game = GameObject.Find("Game").GetComponent<Game>();
+        turn = GameObject.Find("Turn").GetComponent<Turn>();
     }
     public void Initialize()
     {
-        if (!game.IsInitialized())
+        if (!game.IsInitialized() || !turn.IsInitialized())
             return;
         
         city = GetComponent<CityInPlay>();
-        
-        button.interactable = city.owner == game.GetHumanPlayer().GetNation();
 
         if (city == null)
             return;
+
         if (!city.IsInitialized())
             return;
-        
+
+        button.interactable = city.owner == turn.GetCurrentPlayer();
+               
 
         CityDetails details = city.GetDetails();
 
@@ -139,7 +141,7 @@ public class CityUI : MonoBehaviour
 
     public void Toggle()
     {
-        if (game.GetHumanPlayer().GetNation() != city.owner)
+        if (turn.GetCurrentPlayer() != city.owner)
         {
             isOpen = false;
             return;

@@ -51,6 +51,8 @@ public class Die : MonoBehaviour {
 
     public float velocity;
     public float angularVelocity;
+    
+    public float forceStrength;
 
     public bool velocityRolling = true;
     public bool angularVelocityRolling = true;
@@ -139,12 +141,27 @@ public class Die : MonoBehaviour {
         //GetComponent<Rigidbody>().isKinematic = true;
     }
 
+    void ApplyDownwardForce()
+    {
+        // Apply the downward force to the object's Rigidbody
+        Vector3 randomVector = new Vector3(
+            Random.Range(-1f, 1f),
+            Random.Range(-1f, 1f),
+            Random.Range(-1f, 1f)
+        );
+
+        GetComponent<Rigidbody>().AddForce(randomVector * forceStrength, ForceMode.Impulse);
+    }
+
     private void Awake()
     {
         initialPosition = transform.position;
         transform.rotation = Random.rotation;
         initialRotation = transform.rotation;
+
+        ApplyDownwardForce();
     }
+
     void Update()
     {
 

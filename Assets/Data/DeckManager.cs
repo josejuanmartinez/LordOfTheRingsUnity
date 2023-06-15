@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Tilemaps;
 using UnityEngine.UI;
 public class DeckManager : MonoBehaviour
 {
@@ -26,6 +27,9 @@ public class DeckManager : MonoBehaviour
     private MovementManager movementManager;
     private CardDetailsRepo cardRepo;  
     private Game game;
+    private SelectedItems selectedItems;
+    private Tilemap tilemap;
+    private TerrainManager terrainManager;
 
     void Awake()
     {
@@ -37,15 +41,18 @@ public class DeckManager : MonoBehaviour
         movementManager = GameObject.Find("MovementManager").GetComponent<MovementManager>();
         cardRepo = GameObject.Find("CardDetailsRepo").GetComponent<CardDetailsRepo>();
         game = GameObject.Find("Game").GetComponent<Game>();
+        selectedItems = GameObject.Find("SelectedItems").GetComponent<SelectedItems>();
+        tilemap = GameObject.Find("CardTypeTilemap").GetComponent<Tilemap>();
+        terrainManager = GameObject.Find("TerrainManager").GetComponent<TerrainManager>();
     }
 
     void Initialize()
     {
         if (!cardRepo.IsInitialized())
             return;
-        List<string> cardNames = cardRepo.GetCardNamesOfNation(game.GetHumanPlayer().GetNation());
+        List<string> cardNames = cardRepo.GetCardNamesOfNation(turn.GetCurrentPlayer());
         cardsObjects = cardNames.Select(x => cardRepo.GetCardDetails(x)).ToList();
-        Debug.Log("Loaded " + cardsObjects.Count + " cards for " + game.GetHumanPlayer().GetNation().ToString());
+        Debug.Log("Loaded " + cardsObjects.Count + " cards for " + turn.GetCurrentPlayer().ToString());
         Shuffle();
         DrawHand();
         isInitialized = true;
@@ -252,46 +259,55 @@ public class DeckManager : MonoBehaviour
         if (details.IsUndiscoveredRing())
             return IsUndiscoveredRingCardPlayable(details, owner);
 
-        List<CityInPlay> cities = board.GetCityManager().GetCitiesWithCharactersOfPlayer(owner);
-        foreach(CityInPlay city in cities)
+        CardDetails charDetails = selectedItems.GetLastSelectedChar();
+        if (charDetails == null)
+            return false;
+        if (charDetails.GetCardInPlay().IsMoving())
+            return false;
+
+        CityInPlay city = board.GetCityManager().GetCityAtHex(charDetails.GetCardInPlay().GetHex());
+        if (city == null)
+            return false;
+        //List<CityInPlay> cities = board.GetCityManager().GetCitiesWithCharactersOfPlayer(owner);
+        //foreach(CityInPlay city in cities)
+        //{
+        CityDetails cityDetails = city.GetDetails();
+        if(cityDetails != null)
         {
-            CityDetails cityDetails = city.GetDetails();
-            if(cityDetails != null)
+            if (cityDetails.IsTapped(owner))
+                return false;
+            AlignmentsEnum alignment = Nations.alignments[owner];
+            switch(alignment)
             {
-                if (cityDetails.IsTapped(owner))
-                    continue;
-                AlignmentsEnum alignment = Nations.alignments[owner];
-                switch(alignment)
-                {
-                    case AlignmentsEnum.DARK_SERVANTS:
-                    case AlignmentsEnum.CHAOTIC:
-                        foreach(ObjectTypes obj in cityDetails.objectTypesDark)
-                            if (obj == details.itemType) 
+                case AlignmentsEnum.DARK_SERVANTS:
+                case AlignmentsEnum.CHAOTIC:
+                    foreach(ObjectTypes obj in cityDetails.objectTypesDark)
+                        if (obj == details.itemType) 
+                            return true;
+                    break;
+                case AlignmentsEnum.FREE_PEOPLE:
+                case AlignmentsEnum.NEUTRAL:
+                    foreach (ObjectTypes obj in cityDetails.objectTypesFree)
+                        if (obj == details.itemType)
+                            return true;
+                    break;
+                case AlignmentsEnum.RENEGADE:
+                    if(cityDetails.objectTypesRenegade.Count() > 0 || cityDetails.renegadeSprite != null)
+                    {
+                        foreach (ObjectTypes obj in cityDetails.objectTypesRenegade)
+                            if (obj == details.itemType)
                                 return true;
-                        break;
-                    case AlignmentsEnum.FREE_PEOPLE:
-                    case AlignmentsEnum.NEUTRAL:
+                    } 
+                    else
+                    {
                         foreach (ObjectTypes obj in cityDetails.objectTypesFree)
                             if (obj == details.itemType)
                                 return true;
-                        break;
-                    case AlignmentsEnum.RENEGADE:
-                        if(cityDetails.objectTypesRenegade.Count() > 0 || cityDetails.renegadeSprite != null)
-                        {
-                            foreach (ObjectTypes obj in cityDetails.objectTypesRenegade)
-                                if (obj == details.itemType)
-                                    return true;
-                        } 
-                        else
-                        {
-                            foreach (ObjectTypes obj in cityDetails.objectTypesFree)
-                                if (obj == details.itemType)
-                                    return true;
-                        }
-                        break;
-                }
+                    }
+                    break;
             }
         }
+        //}
         return false;
     }
 
@@ -320,6 +336,15 @@ public class DeckManager : MonoBehaviour
 
     public bool CanSpawnAtLastHex()
     {
-        return movementManager.GetLastHex() != MovementManager.NULL2;
+        CardDetails characterDetails = selectedItems.GetLastSelectedChar();
+        if (characterDetails == null)
+            return false;
+
+        HazardCreatureCardDetails hazardDetails = selectedItems.GetHazardCreatureCardDetails();
+        if (hazardDetails == null)
+            return false;
+
+        CardTypesEnum cardType = terrainManager.GetTileAndMovementCost(characterDetails.GetCardInPlay().hex).cardInfo.cardType;
+        return hazardDetails.cardTypes.Contains(cardType);
     }
 }

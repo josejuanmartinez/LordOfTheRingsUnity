@@ -13,7 +13,7 @@ public enum DiceRollEnum
 public class DiceManager : MonoBehaviour
 {
     public static short D10 = 10;
-    public short maxTime = 7;
+    public short maxTime = 4;
 
     public GameObject dice;
     public GameObject diceCanvas;

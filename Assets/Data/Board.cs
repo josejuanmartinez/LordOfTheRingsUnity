@@ -63,8 +63,6 @@ public class Board: MonoBehaviour
             bt.AddCity(city);
         }
         resourcesManager.Initialize(city.owner, city.GetDetails().production);
-        if(city.owner == game.GetHumanPlayer().GetNation())
-            fowManager.UpdateCityFOW(city);
      }
     public void AddCard(Vector2Int hex, CardInPlay card)
     {
@@ -78,7 +76,7 @@ public class Board: MonoBehaviour
             bt.AddCard(card);
         }
         
-        if (card.owner == game.GetHumanPlayer().GetNation())
+        if (card.owner == turn.GetCurrentPlayer())
             fowManager.UpdateCardFOW(card);
     }
 
@@ -131,11 +129,10 @@ public class Board: MonoBehaviour
     {
         string cardId = cardDetails.cardId;
 
-        GameObject instantiatedObject = Instantiate(cardObject);
+        GameObject instantiatedObject = Instantiate(cardObject, cardsCanvasTransform.transform);
         instantiatedObject.name = cardId;
-        instantiatedObject.transform.SetParent(cardsCanvasTransform);
         instantiatedObject.layer = LayerMask.NameToLayer("UI");
-        instantiatedObject.transform.localScale = Vector3.one;
+        //instantiatedObject.transform.localScale = Vector3.one;
         CardInPlay card = instantiatedObject.GetComponent<CardInPlay>();
 
         // Change OWNER
@@ -146,7 +143,7 @@ public class Board: MonoBehaviour
         card.cardId = cardId;
 
         bool success = false;
-
+        
         Vector2Int hex = Vector2Int.one * int.MinValue;
         CityInPlay city;
         switch (spawnCardLocation)
