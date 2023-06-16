@@ -17,6 +17,7 @@ public class SpritesRepo : MonoBehaviour
     public Sprite renegade;
     public Sprite neutral;
     public Sprite chaos;
+    public Sprite poi;
 
     public List<RacesEnum> races;
     public List<Sprite> racesSprites;
@@ -35,6 +36,27 @@ public class SpritesRepo : MonoBehaviour
             return raceDefaultSprite;
         else
             return racesSprites[position];
+    }
+    public Sprite GetAlignmentSprite(NationsEnum nation)
+    {
+        if (nation == NationsEnum.NONE)
+            return poi;
 
+        switch (Nations.alignments[nation])
+        {
+            case AlignmentsEnum.NEUTRAL:
+                return neutral;
+            case AlignmentsEnum.FREE_PEOPLE:
+                return free;
+            case AlignmentsEnum.DARK_SERVANTS:
+                return dark;
+            case AlignmentsEnum.RENEGADE:
+                return renegade;
+            case AlignmentsEnum.CHAOTIC:
+                return chaos;
+            case AlignmentsEnum.NONE:
+                return poi;
+        }
+        return poi;
     }
 }

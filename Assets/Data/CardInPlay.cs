@@ -131,7 +131,15 @@ public class CardInPlay : MonoBehaviour
         else
             return null;
     }
-
+    public HazardCreatureCardDetails GetHazardCreatureDetails()
+    {
+        if (!initialized)
+            Debug.LogError("Calling to `GetHazardCharacterDetails` but CardInPlay still not initialized!");
+        if (GetComponentInChildren<HazardCreatureCardDetails>() != null)
+            return GetComponentInChildren<HazardCreatureCardDetails>();
+        else
+            return null;
+    }
     public CardClass GetCardClass()
     {
         if(!initialized)
@@ -147,6 +155,15 @@ public class CardInPlay : MonoBehaviour
         if (!initialized)
             Debug.LogError("Calling to `IsCharacter` but CardInPlay still not initialized!");
         return GetCardClass() == CardClass.Character;
+    }
+
+
+
+    public bool IsCreature()
+    {
+        if (!initialized)
+            Debug.LogError("Calling to `IsCreature` but CardInPlay still not initialized!");
+        return GetCardClass() == CardClass.HazardCreature;
     }
 
     public bool IsAvatar()

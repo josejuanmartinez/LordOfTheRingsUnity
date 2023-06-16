@@ -14,14 +14,9 @@ public class CardUI : MonoBehaviour
     public TextMeshProUGUI details;
     public TextMeshProUGUI cardName;
 
-    public Sprite freeSprite;
-    public Sprite darkSprite;
-    public Sprite renegadeSprite;
-    public Sprite neutralSprite;
-    public Sprite chaosSprite;
-
     public Button button;
     public Image icon;
+    public Image alignment;
     public Image frame;
     public CanvasGroup canvasGroup;
     public CanvasGroup nextCanvasGroup;
@@ -55,6 +50,7 @@ public class CardUI : MonoBehaviour
     
     private CardInPlay potentialLeader;
     private HashSet<CardInPlay> rejectedMerges = new HashSet<CardInPlay>();
+    private SpritesRepo spritesRepo;
 
     void Awake()
     {
@@ -67,7 +63,7 @@ public class CardUI : MonoBehaviour
         colorManager = GameObject.Find("ColorManager").GetComponent<ColorManager>();
         popupManager = GameObject.Find("PopupManager").GetComponent<PopupManager>();
         turn = GameObject.Find("Turn").GetComponent<Turn>();
-
+        spritesRepo = GameObject.Find("SpritesRepo").GetComponent<SpritesRepo>();
         details.text = "";
     }
 
@@ -85,8 +81,15 @@ public class CardUI : MonoBehaviour
 
         button.interactable = card.owner == turn.GetCurrentPlayer();
 
+        if(card.IsCharacter() && card.GetCharacterDetails() != null)
+        {
+            CharacterCardDetails character = card.GetCharacterDetails();
+            details.text = "<sprite name=\"prowess\">" + character.prowess + "\n<sprite name=\"defence\">" + character.defence + "\n<sprite name=\"movement\">" + (MovementConstants.characterMovement - card.moved).ToString();
+        }      
+
         cardName.text = card.GetDetails().cardName;
         icon.sprite = card.GetDetails().cardSprite;
+        alignment.sprite = spritesRepo.GetAlignmentSprite(card.owner);
         frame.color = colorManager.GetColor(card.owner);
 
         RefreshAtHex();
@@ -228,24 +231,6 @@ public class CardUI : MonoBehaviour
         rejectedMerges.Add(potentialLeader);
     }
 
-    public Sprite GetSprite()
-    {
-        switch (Nations.alignments[card.owner])
-        {
-            case AlignmentsEnum.DARK_SERVANTS:
-                return darkSprite;
-            case AlignmentsEnum.FREE_PEOPLE:
-                return freeSprite;
-            case AlignmentsEnum.NEUTRAL:
-                return neutralSprite;
-            case AlignmentsEnum.CHAOTIC:
-                return chaosSprite;
-            case AlignmentsEnum.RENEGADE:
-                return renegadeSprite;
-            default:
-                return null;
-        }
-    }
     public void Toggle()
     {
         if(turn.GetCurrentPlayer() != card.owner)

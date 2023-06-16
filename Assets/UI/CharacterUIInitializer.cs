@@ -10,12 +10,12 @@ public class CharacterUIInitializer : MonoBehaviour
     public Image cardImage;
     public TextMeshProUGUI cardName;
     public Image alignment;
-    
-    public Sprite free;
-    public Sprite dark;
-    public Sprite neutral;
-    public Sprite renegade;
-    public Sprite chaotic;
+    private SpritesRepo spritesRepo;
+
+    private void Awake()
+    {
+        spritesRepo = GameObject.Find("SpritesRepo").GetComponent<SpritesRepo>();
+    }
 
     public void Initialize(CardInPlay card)
     {
@@ -28,23 +28,16 @@ public class CharacterUIInitializer : MonoBehaviour
         this.cardImage.sprite = cardDetails.cardSprite;
         this.cardName.text = cardDetails.cardName;
 
-        switch (Nations.alignments[cardDetails.GetCardInPlay().owner])
+        alignment.sprite = spritesRepo.GetAlignmentSprite(cardDetails.GetCardInPlay().owner);
+
+        if (card.IsCharacter() && card.GetCharacterDetails() != null)
         {
-            case AlignmentsEnum.FREE_PEOPLE:
-                alignment.sprite = free;
-                break;
-            case AlignmentsEnum.NEUTRAL:
-                alignment.sprite = neutral;
-                break;
-            case AlignmentsEnum.DARK_SERVANTS:
-                alignment.sprite = dark;
-                break;
-            case AlignmentsEnum.RENEGADE:
-                alignment.sprite = renegade;
-                break;
-            case AlignmentsEnum.CHAOTIC:
-                alignment.sprite = chaotic;
-                break;
+            CharacterCardDetails character = card.GetCharacterDetails();
+            details.text = "<sprite name=\"prowess\">" + character.prowess + "\n<sprite name=\"defence\">" + character.defence + "\n<sprite name=\"movement\">" + (MovementConstants.characterMovement - card.moved).ToString();
+        } else if (card.IsCreature() && card.GetHazardCreatureDetails() != null)
+        {
+            HazardCreatureCardDetails creature = card.GetHazardCreatureDetails();
+            details.text = "<sprite name=\"prowess\">" + creature.prowess + "\n<sprite name=\"defence\">" + creature.defence + "\n<sprite name=\"movement\">" + (MovementConstants.characterMovement - card.moved).ToString();
         }
     }
 

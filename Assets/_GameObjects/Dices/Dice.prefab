@@ -711,15 +711,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5400000, guid: a7d97a6373e22f94c8e2d68ea3b8195e, type: 3}
       propertyPath: m_Drag
-      value: 0
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 5400000, guid: a7d97a6373e22f94c8e2d68ea3b8195e, type: 3}
       propertyPath: m_Mass
-      value: 15
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 5400000, guid: a7d97a6373e22f94c8e2d68ea3b8195e, type: 3}
       propertyPath: m_AngularDrag
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5400000, guid: a7d97a6373e22f94c8e2d68ea3b8195e, type: 3}
       propertyPath: m_ImplicitCom
@@ -743,7 +743,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 11400000, guid: a7d97a6373e22f94c8e2d68ea3b8195e, type: 3}
       propertyPath: rotationSpeed
-      value: 40000
+      value: 10000
       objectReference: {fileID: 0}
     - target: {fileID: 11400000, guid: a7d97a6373e22f94c8e2d68ea3b8195e, type: 3}
       propertyPath: rotationAxis.y

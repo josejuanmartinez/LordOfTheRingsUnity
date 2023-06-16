@@ -17,12 +17,6 @@ public class CityUI : MonoBehaviour
 
     public CanvasGroup tapped;
 
-    public Sprite freeSprite;
-    public Sprite darkSprite;
-    public Sprite renegadeSprite;
-    public Sprite neutralSprite;
-    public Sprite poiSprite;
-
     public bool isOpen = false;
     public bool isShownWithOtherCard = false;
 
@@ -34,6 +28,8 @@ public class CityUI : MonoBehaviour
     private Tilemap t;
     private Game game;
     private Turn turn;
+    private SpritesRepo spritesRepo;
+
     private bool isInitialized = false;
 
     private void Awake()
@@ -43,6 +39,7 @@ public class CityUI : MonoBehaviour
         t = GameObject.Find("CardTypeTilemap").GetComponent<Tilemap>();
         game = GameObject.Find("Game").GetComponent<Game>();
         turn = GameObject.Find("Turn").GetComponent<Turn>();
+        spritesRepo = GameObject.Find("SpritesRepo").GetComponent<SpritesRepo>();
     }
     public void Initialize()
     {
@@ -82,31 +79,7 @@ public class CityUI : MonoBehaviour
                 break;
         }
 
-        if(city.owner == NationsEnum.NONE)
-        {
-            alignment.sprite = poiSprite;
-        }
-        else
-        {
-            switch (Nations.alignments[city.owner])
-            {
-                case AlignmentsEnum.NEUTRAL:
-                    alignment.sprite = neutralSprite;
-                    break;
-                case AlignmentsEnum.FREE_PEOPLE:
-                    alignment.sprite = freeSprite;
-                    break;
-                case AlignmentsEnum.DARK_SERVANTS:
-                    alignment.sprite = darkSprite;
-                    break;
-                case AlignmentsEnum.RENEGADE:
-                    alignment.sprite = renegadeSprite;
-                    break;
-                case AlignmentsEnum.NONE:
-                    alignment.sprite = poiSprite;
-                    break;
-            }
-        }
+        alignment.sprite = spritesRepo.GetAlignmentSprite(city.owner);
 
         cityName.text = details.cityName + (details.isHaven ? "<sprite name=\"haven\">" : "");
         detailsObject.SetActive(false);

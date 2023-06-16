@@ -1,11 +1,15 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Turn : MonoBehaviour
 {
     public TextMeshProUGUI turnText;
-    
+    public TextMeshProUGUI playerText;
+    public Image alignment;
+
     private short turnNumber = 0;
     private NationsEnum currentTurnPlayer = NationsEnum.UVATHA;
 
@@ -13,11 +17,11 @@ public class Turn : MonoBehaviour
 
     private Board board;
     private Game game;
-    private bool isNewTurn = true;
     private bool isInitialized = false;
     
     private CameraController cameraController;
     private FOWManager fowManager;
+    private SpritesRepo spritesRepo;
 
     private void Awake()
     {
@@ -25,15 +29,14 @@ public class Turn : MonoBehaviour
         game = GameObject.Find("Game").GetComponent<Game>();
         cameraController = Camera.main.GetComponent<CameraController>();
         fowManager = GameObject.Find("FOWManager").GetComponent<FOWManager>();
+        spritesRepo = GameObject.Find("SpritesRepo").GetComponent<SpritesRepo>();
     }
 
     public void Initialize()
     {
         if(board.IsInitialized() && game.IsInitialized())
         {
-            AddTurn();
-            turnText.text = turnNumber.ToString();
-            currentTurnPlayer = game.GetHumanPlayer().GetNation();
+            NewTurn();
             isInitialized = true;
         }
         
@@ -49,18 +52,6 @@ public class Turn : MonoBehaviour
         
         if (isDirty)
             turnText.text = turnNumber.ToString();
-        
-        if (isNewTurn)
-        {
-            fowManager.UpdateCitiesFOW();
-            fowManager.UpdateCardsFOW();
-            CardInPlay avatar = board.GetCharacterManager().GetAvatar(GetCurrentPlayer());
-            if (avatar)
-                cameraController.LookToCard(avatar);
-            isNewTurn = false;
-
-            
-        }
     }
 
     public bool IsInitialized()
@@ -68,26 +59,49 @@ public class Turn : MonoBehaviour
         return isInitialized;
     }
 
-    public void AddTurn()
+    public void NewTurn()
     {
         turnNumber++;
+
+        currentTurnPlayer = game.GetHumanPlayer().GetNation();
+
         isDirty = true;
-        isNewTurn = true;
+        fowManager.UpdateCitiesFOW();
+        fowManager.UpdateCardsFOW();
+
+        RefreshTurnInfo();
+
+        board.GetCharacterManager().GetCharactersOfPlayer(currentTurnPlayer).ForEach(x => x.moved = 0);
+        
+        CardInPlay avatar = board.GetCharacterManager().GetAvatar(GetCurrentPlayer());
+        if (avatar)
+            cameraController.LookToCard(avatar);
+    }
+
+    public void RefreshTurnInfo()
+    {
+        turnText.text = turnNumber.ToString();
+        playerText.text = LocalizationEN.Localize(currentTurnPlayer.ToString()) + " [" + LocalizationEN.Localize(Nations.regions[currentTurnPlayer].ToString()) + "]";
+        alignment.sprite = spritesRepo.GetAlignmentSprite(currentTurnPlayer);
     }
 
     public NationsEnum GetCurrentPlayer()
     {
         return currentTurnPlayer;
     }
+    public void PlayIATurn()
+    {
+        RefreshTurnInfo();
+        NextPlayer();
+    }
 
     public void NextPlayer()
     {
         currentTurnPlayer = (NationsEnum)(((int)currentTurnPlayer + 1) % Enum.GetValues(typeof(NationsEnum)).Length);
-        if (currentTurnPlayer == NationsEnum.NONE)
-        {
-            AddTurn();
-            currentTurnPlayer = NationsEnum.UVATHA;
-        }
+        if (currentTurnPlayer == NationsEnum.NONE || currentTurnPlayer == game.GetHumanPlayer().GetNation())
+            NewTurn();
+        else
+            PlayIATurn();
     }
 
 }

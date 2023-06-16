@@ -146,7 +146,7 @@ public class Die : MonoBehaviour {
         // Apply the downward force to the object's Rigidbody
         Vector3 randomVector = new Vector3(
             Random.Range(-1f, 1f),
-            Random.Range(-1f, 1f),
+            Random.Range(-1f, 0f),
             Random.Range(-1f, 1f)
         );
 
